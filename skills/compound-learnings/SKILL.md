@@ -15,24 +15,23 @@ Captures problem solutions while context is fresh, creating structured documenta
 
 ## Usage
 
-```bash
-/ce-compound                            # Document the most recent fix
-/ce-compound [brief context]            # Provide additional context hint
-/ce-compound mode:headless              # Non-interactive run for automations
-/ce-compound mode:headless [context]    # Non-interactive run with context hint
-/ce-compound mode:headless depth:lightweight [context] # Lower-overhead non-interactive run
-/ce-compound mode:headless depth:full [context]        # Full non-interactive run
-```
+Invoke by describing what you want, same as any other skill:
+
+- "document that fix" / "capture that as a learning" — document the most recent fix
+- "document that fix — it was about the retry logic timing out" — with a context hint
+- "document that headless" / "run compound-learnings headless" — non-interactive run for automations
+- "document that headless, lightweight" — lower-overhead non-interactive run
+- "document that headless, full" — full non-interactive run
 
 **One learning per run.** The workflow's grounding, overlap detection, and cross-referencing all assume a single solved problem. When a session produced multiple distinct learnings, run the skill once per learning, sequentially — each run grounds fresh against the tree. Do not batch several learnings through one run and stitch cross-references between the drafts afterward; drafting-context numbering ("Learning 3") leaking into written docs is the failure this rule prevents.
 
 ## CONCEPTS.md bootstrap requests
 
-If invoked specifically to create or bootstrap `CONCEPTS.md` from scratch rather than to document a solved problem, do not run the normal phases — `ce-compound` populates `CONCEPTS.md` only as a side effect of documenting a real learning (it seeds the *learning's area*, not the whole repo; see Phase 2.4). Repo-wide concept-map creation is `ce-compound-refresh`'s job. Redirect a standalone bootstrap request to `ce-compound-refresh` (which asks whether to build the concept map or run a refresh cycle), then exit.
+If invoked specifically to create or bootstrap `CONCEPTS.md` from scratch rather than to document a solved problem, do not run the normal phases — `compound-learnings` populates `CONCEPTS.md` only as a side effect of documenting a real learning (it seeds the *learning's area*, not the whole repo; see Phase 2.4). Building a repo-wide concept map from scratch is out of scope for this skill. Tell the user that directly — this skill only seeds `CONCEPTS.md` incrementally as real problems get documented — and exit.
 
 ## Mode Detection
 
-Enter headless mode when **either** holds: the arguments you were invoked with contain the `mode:headless` token, **or** the invocation makes non-interactive intent unmistakable — a caller or standing instruction asking to run `ce-compound` "headless", "non-interactively", "unattended", or "without prompts/questions". The token is the explicit form; a clear natural-language request for a non-interactive run is equivalent. Bare "automatically" or "auto-run" is **not** on its own a headless signal — it speaks to *invoking* the skill, not to suppressing its prompts — so an ambiguous or absent signal defaults to interactive. Tokens starting with `mode:` or `depth:` are flags, not context — strip them before treating the remainder as the brief context hint.
+Enter headless mode when **either** holds: the arguments you were invoked with contain the `mode:headless` token, **or** the invocation makes non-interactive intent unmistakable — a caller or standing instruction asking to run `compound-learnings` "headless", "non-interactively", "unattended", or "without prompts/questions". The token is the explicit form; a clear natural-language request for a non-interactive run is equivalent. Bare "automatically" or "auto-run" is **not** on its own a headless signal — it speaks to *invoking* the skill, not to suppressing its prompts — so an ambiguous or absent signal defaults to interactive. Tokens starting with `mode:` or `depth:` are flags, not context — strip them before treating the remainder as the brief context hint.
 
 Depth is an explicit headless-only selector. In headless mode, accept at most one depth token: `depth:lightweight` routes directly to Lightweight Mode, while `depth:full` routes to Full Mode with its automatic session-history probe. `mode:headless` without a `depth:` token remains backward compatible and runs Full Mode. Headless lightweight asks no blocking questions and launches no subagents. If the invocation contains an unknown `depth:` token, multiple `depth:` tokens, or a `depth:` token without headless intent, do not guess; emit the headless failure report with the reason and end with `Documentation skipped`.
 
@@ -68,7 +67,7 @@ When spawning subagents, pass the relevant file contents into the task prompt so
 
 ## Execution Strategy
 
-`ce-compound` does not ask the user which mode to run or whether to search session history. Both are decisions the agent is better positioned to make: mode depends on context budget the agent can observe, and session-history value is unknowable a priori to *either* party (the payoff is an unrelated earlier session the current agent was never in), so it is resolved by a cheap probe rather than a question. The only interactive prompt in the whole workflow is the Discoverability Check consent, because that one edits a tracked instruction file.
+`compound-learnings` does not ask the user which mode to run or whether to search session history. Both are decisions the agent is better positioned to make: mode depends on context budget the agent can observe, and session-history value is unknowable a priori to *either* party (the payoff is an unrelated earlier session the current agent was never in), so it is resolved by a cheap probe rather than a question. The only interactive prompt in the whole workflow is the Discoverability Check consent, because that one edits a tracked instruction file.
 
 **Mode selection (Full vs Lightweight) — decide it, don't ask it.**
 
@@ -342,15 +341,15 @@ Then, applying those criteria, scan the new doc **and** the surrounding conversa
 
 **Verify behavior assertions against source before writing them.** When an entry asserts how code behaves (states, transitions, limits, semantics), Read the defining source at the current tree first — an entry drafted from a session-level summary is exactly how wrong semantics enter the glossary. Phase 2.45 re-checks these entries, but the cheap fix is to not write the error.
 
-**Seed the learning's area at creation — don't write a lone term.** When `CONCEPTS.md` does not yet exist, alongside the surfaced term also seed the core domain nouns of the area this learning touched, following the **Seed goal** and **Scope of a seed** rules in `references/concepts-vocabulary.md`. The seed is scoped to the learning's area (the modules and domain the fix touched) and defines only terms investigated here — it does not reach for repo-wide nouns. This anchors the surfaced term so it does not dangle against undefined siblings. A repo-wide concept map is `ce-compound-refresh`'s bootstrap path, not this one.
+**Seed the learning's area at creation — don't write a lone term.** When `CONCEPTS.md` does not yet exist, alongside the surfaced term also seed the core domain nouns of the area this learning touched, following the **Seed goal** and **Scope of a seed** rules in `references/concepts-vocabulary.md`. The seed is scoped to the learning's area (the modules and domain the fix touched) and defines only terms investigated here — it does not reach for repo-wide nouns. This anchors the surfaced term so it does not dangle against undefined siblings. A repo-wide concept map is out of scope for this skill — it only ever seeds the area a real learning touched.
 
 **At creation, hold the qualifying bar conservatively for borderline terms.** A borderline term, or a class/table/file name dressed up as an entity, defers to a later run — clear core nouns are seeded, borderline ones wait. The conservatism is about quality, not count; updates to an existing file follow the normal criteria.
 
 **When bootstrapping the file, start with this preamble under the `# Concepts` heading**, then add the qualifying entries below it:
 
-> Shared domain vocabulary for this project — entities, named processes, and status concepts with project-specific meaning. Seeded with core domain vocabulary, then accretes as ce-compound and ce-compound-refresh process learnings; direct edits are fine. Glossary only, not a spec or catch-all.
+> Shared domain vocabulary for this project — entities, named processes, and status concepts with project-specific meaning. Seeded with core domain vocabulary, then accretes as compound-learnings processes new learnings; direct edits are fine. Glossary only, not a spec or catch-all.
 
-**Refresh the coherence neighborhood of any entry you touch.** When adding or editing an entry, also inspect its *coherence neighborhood* — its cluster siblings and the terms it cross-references or that reference it. Within that neighborhood, do two things: fix glossary violations (implementation specifics — file paths, class names, function signatures, current-config values), and refresh entries the learning's own evidence shows have drifted. Bounds: neighborhood only, never a full-file audit; refresh only on evidence already in hand; if judging a neighbor would require investigation this learning did not do, flag it for `ce-compound-refresh` rather than editing on a guess. The test: after the edit, would a reader find the touched entry's siblings or referenced terms inconsistent with it? Broader audit is `ce-compound-refresh`'s job.
+**Refresh the coherence neighborhood of any entry you touch.** When adding or editing an entry, also inspect its *coherence neighborhood* — its cluster siblings and the terms it cross-references or that reference it. Within that neighborhood, do two things: fix glossary violations (implementation specifics — file paths, class names, function signatures, current-config values), and refresh entries the learning's own evidence shows have drifted. Bounds: neighborhood only, never a full-file audit; refresh only on evidence already in hand; if judging a neighbor would require investigation this learning did not do, note it in the terminal report as a candidate for manual follow-up rather than editing on a guess. The test: after the edit, would a reader find the touched entry's siblings or referenced terms inconsistent with it? A broader audit of the whole file is out of scope for this skill.
 
 If no terms qualified after applying the reference's criteria, record that outcome explicitly in the success output (e.g., "Vocabulary capture: scanned, no qualifying terms"). Do not silently skip — the visible scan-and-no-result record is the audit signal that the reference was consulted.
 
@@ -371,13 +370,11 @@ The doc (and any `CONCEPTS.md` entries from Phase 2.4) is about to become perman
 
 2. **Semantic grounding validator (Full mode, including headless Full; lightweight skips it).** Dispatch one read-only generic subagent built from the prompt template in the reference, covering the written doc plus any `CONCEPTS.md` entries added or edited this run. It verifies code-behavior claims by quoting the defining source line, merge-state claims against remote truth (`gh` primary, git reachability fallback), and internal completeness of countable assertions. Apply its verdicts per the reference (fix contradicted claims from the quoted evidence; soften or drop unverifiable ones; mark offline merge-state checks as degraded), then re-run the mechanical check if the body changed.
 
-### Phase 2.5: Selective Refresh Check
+### Phase 2.5: Selective Staleness Check
 
-After writing the new learning, decide whether this new solution is evidence that older docs should be refreshed.
+After writing the new learning, decide whether this new solution is evidence that older docs are now stale. There is no companion refresh skill in this library to hand this off to — `compound-learnings` only ever flags staleness, it never rewrites another doc automatically. Rewriting other docs' guidance is a bigger, riskier action than documenting the current learning, and doing it well needs its own grounding pass against each stale candidate — a job for a deliberate, separate follow-up, not a side effect of this run.
 
-`ce-compound-refresh` is **not** a default follow-up. Use it selectively when the new learning suggests an older learning or pattern doc may now be inaccurate.
-
-It makes sense to invoke `ce-compound-refresh` when one or more of these are true:
+Flag a candidate when one or more of these are true:
 
 1. A related learning or pattern doc recommends an approach that the new fix now contradicts
 2. The new fix clearly supersedes an older documented solution
@@ -386,37 +383,30 @@ It makes sense to invoke `ce-compound-refresh` when one or more of these are tru
 5. The Related Docs Finder surfaced high-confidence refresh candidates in the same problem space
 6. The Related Docs Finder reported **moderate overlap** with an existing doc — there may be consolidation opportunities that benefit from a focused review
 
-It does **not** make sense to invoke `ce-compound-refresh` when:
+Don't flag anything when:
 
 1. No related docs were found
 2. Related docs still appear consistent with the new learning
 3. The overlap is superficial and does not change prior guidance
-4. Refresh would require a broad historical review with weak evidence
+4. A proper assessment would require a broad historical review with weak evidence — don't speculate
 
 Use these rules:
 
-- If there is **one obvious stale candidate**, invoke `ce-compound-refresh` with a narrow scope hint after the new learning is written
-- If there are **multiple candidates in the same area**, ask the user whether to run a targeted refresh for that module, category, or pattern set
-- If context is already tight or you are in lightweight mode, do not expand into a broad refresh automatically; instead recommend `ce-compound-refresh` as the next step with a scope hint
-- **In headless mode**, never invoke `ce-compound-refresh` and never ask the user. Surface the recommended scope hint in the terminal report's "Refresh recommendation" line and let the caller decide
+- If there is **one obvious stale candidate**, note it in the terminal report's "Refresh recommendation" line with a narrow scope hint, so the user can act on it as a separate, deliberate step.
+- If there are **multiple candidates in the same area** and you're in interactive mode, ask the user whether they want to open and update one of the stale docs now, as a follow-up after this run.
+- If context is already tight or you are in lightweight mode, skip this check entirely — a lightweight run's job is the new doc, not a quality sweep of old ones.
+- **In headless mode**, never ask the user. Surface every recommended scope hint in the terminal report's "Refresh recommendation" line and let the caller decide.
 
-When invoking or recommending `ce-compound-refresh`, be explicit about the argument to pass. Prefer the narrowest useful scope:
+When flagging a candidate, be explicit about the scope. Prefer the narrowest useful description:
 
 - **Specific file** when one learning or pattern doc is the likely stale artifact
 - **Module or component name** when several related docs may need review
 - **Category name** when the drift is concentrated in one solutions area
 - **Pattern filename or pattern topic** when the stale guidance lives in `docs/solutions/patterns/`
 
-Examples:
+Examples of a scope hint: "the plugin-versioning-requirements doc", "the payments category", "the performance-issues docs", "the critical-patterns doc".
 
-- `/ce-compound-refresh plugin-versioning-requirements`
-- `/ce-compound-refresh payments`
-- `/ce-compound-refresh performance-issues`
-- `/ce-compound-refresh critical-patterns`
-
-A single scope hint may still expand to multiple related docs when the change is cross-cutting within one domain, category, or pattern area.
-
-Do not invoke `ce-compound-refresh` without an argument unless the user explicitly wants a broad sweep.
+A single scope hint may still point at multiple related docs when the change is cross-cutting within one domain, category, or pattern area.
 
 Always capture the new learning first. Refresh is a targeted maintenance follow-up, not a prerequisite for documentation.
 
@@ -475,8 +465,8 @@ Based on problem type, optionally dispatch generic subagents seeded with local p
 - **performance_issue** → `references/agents/performance-oracle.md`
 - **security_issue** → `references/agents/security-sentinel.md`
 - **database_issue** → `references/agents/data-integrity-guardian.md`
-- Any code-heavy issue → preserve code simplification as a **read-only documentation review**. Inspect the solution draft's code examples and explanatory claims inline, or dispatch a generic subagent seeded with a local prompt only to return suggestions. Do **not** invoke `ce-simplify-code` from this phase and do not mutate product code unless the user explicitly asks for a separate code-simplification pass. Do not use the deleted `code-simplicity-reviewer`.
-  Example: review the solution draft's examples for speculative abstractions, redundant wrappers, dead branches, and just-in-case parameters. Apply edits only to the documentation/examples being written by `ce-compound`; leave any branch code changes untouched.
+- Any code-heavy issue → preserve code simplification as a **read-only documentation review**. Inspect the solution draft's code examples and explanatory claims inline, or dispatch a generic subagent seeded with a local prompt only to return suggestions. Do **not** mutate product code from this phase — that's a separate, deliberate code-simplification pass the user can ask for on their own (e.g. superpowers:requesting-code-review), not a side effect of this phase. Do not use the deleted `code-simplicity-reviewer`.
+  Example: review the solution draft's examples for speculative abstractions, redundant wrappers, dead branches, and just-in-case parameters. Apply edits only to the documentation/examples being written by `compound-learnings`; leave any branch code changes untouched.
 
 </parallel_tasks>
 
@@ -526,12 +516,12 @@ a one-line mention helps agents find the shared vocabulary.
 
 Note: This was created in lightweight mode. For richer documentation
 (cross-references, detailed prevention strategies, specialized reviews,
-semantic grounding validation), re-run /ce-compound in a fresh session.
+semantic grounding validation), re-run compound-learnings in a fresh session.
 ```
 
 **No subagents are launched. No parallel tasks. The solution doc is the one deliverable** (Phase 2.4's update-only vocabulary capture may also refine an existing `CONCEPTS.md`).
 
-In lightweight mode, the overlap check is skipped (no Related Docs Finder subagent). This means lightweight mode may create a doc that overlaps with an existing one. That is acceptable — `ce-compound-refresh` will catch it later. Only suggest `ce-compound-refresh` if there is an obvious narrow refresh target. Do not broaden into a large refresh sweep from a lightweight session.
+In lightweight mode, the overlap check is skipped (no Related Docs Finder subagent). This means lightweight mode may create a doc that overlaps with an existing one. That is acceptable — flag it in the terminal report if it's an obvious narrow case, and leave it for a later, deliberate pass otherwise. Do not broaden into a large refresh sweep from a lightweight session.
 
 ---
 
@@ -618,7 +608,7 @@ Grounding: <mechanical check clean | N flags adjudicated>
 Discoverability: <no gap | gap noted — instruction-file tip emitted | not applicable — no active project instructions>
 CONCEPTS.md: <not present | scanned, no qualifying terms | updated — N added, N refined>
 CONCEPTS.md discoverability: <not checked — CONCEPTS.md not refined | no gap | gap noted — instruction-file tip emitted | not applicable — no active project instructions>
-Refresh recommendation: <none | scope hint for /ce-compound-refresh>
+Refresh recommendation: <none | scope hint>
 
 Documentation complete
 ```
@@ -635,7 +625,7 @@ Overlap: <none | low | moderate — see <path> | high — existing doc updated>
 Grounding: <clean | N flags adjudicated (X fixed, Y annotated, Z confirmed) | N claims softened or corrected | degraded — merge-state claims unverified offline>
 Instruction-file edit: <none needed | gap noted, not applied>
 CONCEPTS.md: <scanned, no qualifying terms | created with N entries (M seeded from the learning's area) | updated — N added, N refined>
-Refresh recommendation: <none | scope hint for /ce-compound-refresh>
+Refresh recommendation: <none | scope hint>
 
 Documentation complete
 ```
@@ -683,7 +673,7 @@ issues occur in the Email Processing or Brief System modules.
 Refresh recommendation: none
 ```
 
-**End the turn after the summary — `ce-compound` does not present a "What's next?" menu.** The doc is written and any cross-references the workflow found are already in it. Cross-doc maintenance (fixing references in *other* docs, consolidation) is deferred to `ce-compound-refresh` via the `Refresh recommendation` line above — the skill designed for it — not auto-applied here, which would edit tracked docs beyond the one deliverable. If the user wants to view the file or take a follow-up action, they will ask. (Interactive mode only.)
+**End the turn after the summary — `compound-learnings` does not present a "What's next?" menu.** The doc is written and any cross-references the workflow found are already in it. Cross-doc maintenance (fixing references in *other* docs, consolidation) is a deliberate, separate follow-up flagged via the `Refresh recommendation` line above — not auto-applied here, which would edit tracked docs beyond the one deliverable. If the user wants to view the file or take a follow-up action, they will ask. (Interactive mode only.)
 
 **Alternate interactive output (when updating an existing doc due to high overlap):** in headless mode, this case is communicated via the `Overlap: high — existing doc updated` line of the headless terminal report above, not as a separate output block.
 
@@ -721,7 +711,7 @@ Build → Test → Find Issue → Research → Improve → Document → Validate
 
 <auto_invoke> <trigger_phrases> - "that worked" - "it's fixed" - "working now" - "problem solved" </trigger_phrases>
 
-<manual_override> Use /ce-compound [context] to document immediately without waiting for auto-detection. </manual_override> </auto_invoke>
+<manual_override> Ask for compound-learnings by name, with context, to document immediately without waiting for auto-detection. </manual_override> </auto_invoke>
 
 ## Output
 
@@ -746,7 +736,7 @@ Based on problem type, these local prompt assets can enhance documentation:
 
 ### When to Invoke
 - **Auto-triggered** (optional): Generic subagents seeded with local prompts can run post-documentation for enhancement
-- **Manual trigger**: User can run surviving skills such as `ce-simplify-code` after `/ce-compound` completes for deeper code review and mutation
+- **Manual trigger**: after this completes, the user can separately ask for a deeper code-quality pass over the change (e.g. superpowers:requesting-code-review) if they want one — this skill doesn't do that itself.
 
 ## Related Commands
 
