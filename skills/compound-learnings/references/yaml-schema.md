@@ -49,7 +49,7 @@ No additional required fields beyond the shared ones. All fields below are optio
 
 ## Optional Fields (bug track only)
 
-- **framework_version**: Framework/runtime version, if relevant to this bug (e.g. `7.1.2`, `20.11.0`)
+- **framework_version**: Framework/runtime version, if relevant to this bug (e.g. `Rails 7.1.2`, `Node 20.11.0`)
 
 ## Backward Compatibility
 

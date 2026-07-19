@@ -186,7 +186,7 @@ optional_fields:
 bug_optional_fields:
   framework_version:
     type: string
-    description: "Framework or runtime version relevant to this bug, if applicable (e.g. \"7.1.2\", \"20.11.0\", \"3.12\"). Omit entirely when no single framework/runtime version is relevant."
+    description: "Framework or runtime version relevant to this bug, if applicable (e.g. \"Rails 7.1.2\", \"Node 20.11.0\", \"Python 3.12\"). Omit entirely when no single framework/runtime version is relevant."
 
 # --- Backward compatibility --------------------------------------------------
 # Docs created before the track system was introduced may have bug-track
