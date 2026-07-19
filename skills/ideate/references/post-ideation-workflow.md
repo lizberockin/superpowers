@@ -75,7 +75,7 @@ This ranked list doubles as the index the user references when choosing an idea 
 ### 4.3 Open It
 
 - **HTML:** in an interactive session, best-effort open the file in the browser via the platform's open primitive (`open` on macOS, `xdg-open` on Linux, `start` on Windows); always print the absolute path so it can be reopened or shared. Skip auto-open in headless / pipeline runs (no interactive surface).
-- **Markdown:** print the path. Proof (the markdown share surface) is reached through the Phase 5 menu — it is a network action, not auto-invoked.
+- **Markdown:** print the path. There is no publishing integration in this build — the file on disk is the deliverable.
 
 ## Phase 5: Next Steps
 
@@ -87,9 +87,8 @@ The deliverable already exists (Phase 4), so the menu is purely *what next* — 
 
 Offer four options (self-contained labels with the distinguishing word front-loaded so they stay distinct when truncated). Option 1 is **format-keyed** — render exactly one of its two labels per run, matching `OUTPUT_FORMAT`:
 
-1. *(when `OUTPUT_FORMAT=html`)* **Open in browser** — open the saved HTML deliverable (re-open if it was already opened).
-   *(when `OUTPUT_FORMAT=md`)* **Publish to Proof** — publish the saved markdown to Proof and get a shareable link; one-way, the local file stays canonical.
-2. **Brainstorm one idea with `ce-brainstorm`** — commit a chosen idea to a requirements-only unified plan under `docs/plans/`; leaves ce-ideate. Asks which idea first.
+1. *(when `OUTPUT_FORMAT=html`, otherwise this option is omitted and the menu has three options)* **Open in browser** — open the saved HTML deliverable (re-open if it was already opened).
+2. **Brainstorm one idea with `brainstorming`** — hand the chosen idea to superpowers' `brainstorming` skill to turn into an approved design. Leaves `ideate`. Asks which idea first.
 3. **Discuss or refine the ideas first** — stay here to think across the set before committing: adjust or interrogate one idea, compare several, or combine/merge them. Asks what you want to work on.
 4. **Done — keep the file and stop.**
 
@@ -97,31 +96,26 @@ Offer four options (self-contained labels with the distinguishing word front-loa
 
 If the user already named what they want to work on inline (e.g. "brainstorm the table tool", "tighten the highlighter idea", "merge the table and highlighter ideas"), skip the follow-up that asks what to work on for §5.2 / §5.3.
 
-### 5.1 Open in Browser (html) / Publish to Proof (md)
+### 5.1 Open in Browser (html only)
 
-- **HTML — Open in browser.** (Re)open the saved file via the platform primitive where available; otherwise print the absolute path. Return to the Phase 5 menu. No Proof — the HTML file is the canonical record.
-- **Markdown — Publish to Proof.** The local markdown file already exists (Phase 4) and stays canonical; Proof is a one-way published copy, not a sync target. Load the `ce-proof` skill to publish, passing:
-  - **source file:** the saved `.md` file from Phase 4.
-  - **doc title:** `Ideation: <topic>` or the doc's H1.
-  - **identity:** `ai:compound-engineering` / `Compound Engineering`.
-
-  ce-proof creates a shared Proof doc (Create and Share workflow) and returns the share URL. Surface it to the user, then return to the Phase 5 menu — nothing syncs back to disk. If the Proof handoff fails after the proof skill's internal retry plus one orchestrator-side retry (~2s pause, narrated as "Retrying Proof... attempt 2/2"), tell the user Proof is unavailable and that the local file is intact at `<path>`, then return to the menu — the deliverable was never at risk (it was written in Phase 4). *(If the user explicitly asked for Proof during an HTML run: Proof is markdown-only and cannot ingest HTML, so render a throwaway markdown copy of the survivors as the Proof source and do not upload the `.html`.)*
+- **HTML — Open in browser.** (Re)open the saved file via the platform primitive where available; otherwise print the absolute path. Return to the Phase 5 menu. The HTML file is the canonical record.
+- **Markdown mode has no equivalent step.** The saved `.md` file's path was already surfaced in the Phase 5 stem — there's nothing further to do here. (There is no publishing integration in this build; the file on disk is the deliverable.)
 
 ### 5.2 Brainstorm One Idea
 
 1. **Identify the idea** by number or name (skip if the user already named it). Match against the ranked list from Phase 4.2.
-2. **Build a focused seed** from the idea's substance already in the orchestrator's context. Do **not** pass the whole file — wasteful and noisy (the other survivors, grounding, and rejection table are irrelevant to defining this one idea, and an HTML file carries CSS/SVG chrome). Do **not** pass only a file pointer — that forces `ce-brainstorm` to re-open and re-extract the idea the orchestrator already holds. The seed is feature-description-shaped:
+2. **Build a focused seed** from the idea's substance already in the orchestrator's context. Do **not** pass the whole file — wasteful and noisy (the other survivors, grounding, and rejection table are irrelevant to defining this one idea, and an HTML file carries CSS/SVG chrome). Do **not** pass only a file pointer — that forces `brainstorming` to re-open and re-extract the idea the orchestrator already holds. The seed is feature-description-shaped:
 
    > `<title> — <description>. Basis: <basis/evidence>. Why it matters: <rationale>. Known tradeoffs: <downsides>.`
 
-   The basis/evidence directly feeds `ce-brainstorm`'s product-pressure-test, so it won't re-derive what we already know. Append a one-line provenance pointer: `(Seeded from ce-ideate: <path>, idea "<title>")` — it records origin and lets brainstorm pull adjacent detail if it wants, without being forced to read anything.
-3. **Load the `ce-brainstorm` skill** with that seed. The saved file is already the record — no extra write step.
+   Append a one-line provenance pointer: `(Seeded from ideate: <path>, idea "<title>")` — it records origin and lets brainstorming pull adjacent detail if it wants, without being forced to read anything.
+3. **Invoke the `brainstorming` skill** with that seed as the starting idea. `brainstorming` runs its own normal dialogue from there (clarifying questions, 2-3 approaches, design sections) — this handoff just gives it a grounded starting point instead of a cold "let's build X".
 
-**Repo mode only:** do **not** skip brainstorming and go straight to `ce-plan` — `ce-plan` wants a brainstorm-grounded Product Contract. In elsewhere modes, ideation is a legitimate terminal state; brainstorming is optional deeper development of one idea, not a required next rung on an implementation ladder that does not exist in these modes.
+**Repo mode only:** do **not** skip brainstorming and go straight to implementation — `writing-plans` (which `brainstorming` hands off to once its design is approved) wants an approved design behind it, not a bare idea. In elsewhere modes, ideation is a legitimate terminal state; brainstorming is optional deeper development of one idea, not a required next rung on an implementation ladder that does not exist in these modes.
 
 ### 5.3 Discuss or Refine the Ideas First
 
-This stays in ce-ideate — no skill handoff. It is the "think across the set before committing" step, and it is a normal, expected outcome of ideation: seeing several strong candidates and wanting to deliberate is more common than instantly committing one. The orchestrator still holds the full grounding and generation context, so it can reason across every survivor — this is where that context pays off. The work here is either **single-idea** (sharpen or interrogate one) or **cross-idea** (compare, combine, or merge several); do not force the user to name a single idea before they can engage.
+This stays in ideate — no skill handoff. It is the "think across the set before committing" step, and it is a normal, expected outcome of ideation: seeing several strong candidates and wanting to deliberate is more common than instantly committing one. The orchestrator still holds the full grounding and generation context, so it can reason across every survivor — this is where that context pays off. The work here is either **single-idea** (sharpen or interrogate one) or **cross-idea** (compare, combine, or merge several); do not force the user to name a single idea before they can engage.
 
 1. **Establish what the user wants to work on and how.** Infer from their phrasing when given; otherwise ask one open question ("What do you want to work on?") rather than assuming a single idea. The scope may be one idea, a subset, or the whole set.
 2. **Route by intent:**
@@ -164,4 +158,4 @@ Before finishing, check:
 - survivors are materially better than a naive "give me ideas" list
 - the deliverable was written automatically in both modes (Phase 4) — to `docs/ideation/` when present, else the CE temp area, never the user's CWD
 - the session showed a concise summary, not a reproduction of the full deliverable
-- acting on an idea routes to `ce-brainstorm` (with a substance seed, not the whole file), not directly to implementation
+- acting on an idea routes to `brainstorming` (with a substance seed, not the whole file), not directly to implementation
