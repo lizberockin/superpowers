@@ -1,10 +1,14 @@
 # Integrating gstack and compound-engineering skills into Superpowers
 
+## Goal
+
+An easily-installed, core skill set for Claude Code to use across every project — install once via the plugin mechanism, no per-project setup, no external daemon or CLI dependency. The five incoming skills shouldn't just sit alongside the existing library as five more independent commands: the point is an *integrated* system where skills hand off to and reinforce each other, and where the system gets more useful the more it's used — `office-hours` feeds into `brainstorming` feeds into `writing-plans`; `compound-learnings` captures what gets solved, and other skills consult it on later runs. This is the lens the rest of this spec is written through: prefer wiring skills together (cross-links, a shared wiki, deliberate sequencing) over shipping them as isolated bolt-ons.
+
 ## Problem
 
 Three sibling repos in `~/AI` each carry valuable, non-overlapping skill content:
 
-- **superpowers** — the target. A multi-harness Claude Code plugin with a flat skill namespace, a minimal two-field frontmatter contract (`name`, `description`), no runtime dependencies beyond the harness itself, and a strict authoring discipline (`writing-skills`) built on TDD-for-docs.
+- **superpowers** — the target. This fork is a personal, Claude-Code-only skills library (multi-harness support for Codex/Cursor/Kimi/OpenCode/Pi/Gemini, along with the upstream project's release notes and contribution machinery, was stripped in a prior cleanup pass) with a flat skill namespace, a minimal two-field frontmatter contract (`name`, `description`), no runtime dependencies beyond Claude Code itself, and a strict authoring discipline (`writing-skills`) built on TDD-for-docs.
 - **gstack** — has three skills we want: `office-hours` (YC-style idea-validation forcing questions + builder-mode design brainstorming), `plan-ceo-review` (scope/ambition review of a plan), `plan-eng-review` (engineering-rigor review of a plan). These are excellent *content*, but they are deeply wired into gstack's private runtime.
 - **compound-engineering** — has two skills we want: `ce-compound` (capture a solved problem as durable docs, with overlap detection and cross-referencing) and `ce-ideate` (generate and evaluate grounded ideas via parallel research subagents). These are much closer to superpowers' own conventions already.
 
@@ -88,7 +92,7 @@ These are cross-cutting edits to skills outside the five being ported, so they l
 
 ## Decisions
 
-1. **Vehicle:** a branch on superpowers (`integrate-gstack-compound-skills`, already created off `main`), not a new repo. Superpowers is the multi-harness distribution mechanism (plugin manifests for Claude Code/Codex/Cursor/Kimi/opencode/pi/Gemini) — a new repo would have to rebuild that for no reason.
+1. **Vehicle:** a branch on superpowers (`integrate-gstack-compound-skills`, already created off `main`), not a new repo. Superpowers already provides everything "easily installed" needs: a Claude Code plugin manifest (`.claude-plugin/`), the session-start hook that bootstraps skill discovery, and the existing skill library these five need to integrate with. A new repo would have to rebuild all of that for no reason, and would work against the actual goal — one integrated set, not a second parallel library to keep in sync.
 2. **Naming:** keep `office-hours`, `plan-ceo-review`, `plan-eng-review` as-is (recognizable, no collisions, already read as noun-phrase skill names compatible with superpowers style). Rename `ce-compound` → `compound-learnings` and `ce-ideate` → `ideate` (open to bikeshedding, but something gerund-shaped and prefix-free).
 3. **Frontmatter:** normalize all five to superpowers' two-field contract (`name`, `description`, third-person "Use when..." phrasing per `writing-skills`). Drop `preamble-tier`, `interactive`, `allowed-tools`, `triggers`, `gbrain`, `argument-hint`, `version`. Preserve `benefits-from` as an informal "See also" prose line in the body (superpowers has no such frontmatter field, and inventing one for three skills isn't warranted — a body cross-reference does the same job for a human or agent reading the file).
 4. **gstack runtime dependency:** strip the entire "Preamble (run first)" bash block and every `gbrain` context-query. Replace the *intent* (surface relevant prior work before the skill runs) with a **two-tier, portable context step**:
@@ -120,10 +124,10 @@ Reordered from the original draft: `compound-learnings` now lands first because 
 4. Run each rewritten skill through the `writing-skills` TDD loop (pressure-test with a subagent, since none of these three have ever been tested against superpowers' own bar) before merging.
 
 **Phase 3 — wiki consultation retrofits + integration polish**
-1. Apply the wiki-consultation edits from the table above to `systematic-debugging`, `writing-plans`, `brainstorming`, `finishing-a-development-branch`, `requesting-code-review`, `receiving-code-review`, and `writing-skills`. Each is a small, additive step/paragraph — not a rewrite of the skill's core methodology — and should itself go through pressure-testing per `writing-skills`, since these are exactly the "carefully-tuned content" changes `CLAUDE.md` holds to a high bar.
+1. Apply the wiki-consultation edits from the table above to `systematic-debugging`, `writing-plans`, `brainstorming`, `finishing-a-development-branch`, `requesting-code-review`, `receiving-code-review`, and `writing-skills`. Each is a small, additive step/paragraph — not a rewrite of the skill's core methodology — but these are already-tuned, frequently-triggered skills. Pressure-test each edit per `writing-skills` (baseline vs. with-the-addition, per its RED/GREEN methodology) before merging rather than assuming an additive line is automatically safe.
 2. Update `skills/using-superpowers/SKILL.md`'s "Skill Priority" section if the new skills change the recommended ordering for "let's build X" / "help me think through an idea" style requests (likely: office-hours before brainstorming when the idea's *worth* is in question).
 3. Update root `README.md` skill list/table.
-4. Bump `plugin.json` / `marketplace.json` version (minor bump — new skills, no breaking changes) and add a `RELEASE-NOTES.md` entry.
+4. Bump the version in `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` (minor bump — new skills, no breaking changes). `RELEASE-NOTES.md` and the automated cross-file `scripts/bump-version.sh` were both removed in the personal-use cleanup pass, so this is now a manual, two-file edit — no changelog entry needed for a personal fork.
 5. No hook changes needed — `hooks/session-start` only injects `using-superpowers`, which is unaffected structurally.
 
 ## Explicitly out of scope
