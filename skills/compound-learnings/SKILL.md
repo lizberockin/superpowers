@@ -1,10 +1,9 @@
 ---
-name: ce-compound
-description: Document a recently solved problem or durable project vocabulary in docs/solutions/ or CONCEPTS.md. Use when capturing a learning after work.
-argument-hint: "[optional: brief context] [mode:headless] [depth:lightweight|full]"
+name: compound-learnings
+description: Use when a problem was just solved, a durable project convention was established, or project-specific vocabulary emerged — captures it as searchable documentation in docs/solutions/ or CONCEPTS.md before the context is lost.
 ---
 
-# /ce-compound
+# Compound Learnings
 
 Coordinate multiple subagents working in parallel to document a recently solved problem.
 
