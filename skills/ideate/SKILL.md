@@ -1,19 +1,17 @@
 ---
-name: ce-ideate
-description: "Generate and evaluate grounded ideas. Use when the user asks for ideas, improvements, surprising options, or AI-generated directions before choosing one to develop; use ce-brainstorm to refine the user's own idea."
-argument-hint: "[feature, focus area, or constraint] [output:md]"
-
+name: ideate
+description: Use when the user asks for ideas, improvements, surprising options, or AI-generated directions before choosing one to develop — generates and evaluates grounded ideas via parallel research subagents. Use brainstorming instead to refine an idea the user already has in mind.
 ---
 
 # Generate Improvement Ideas
 
 **Note: The current year is 2026.** Use this when dating ideation documents and checking recent ideation artifacts.
 
-`ce-ideate` precedes `ce-brainstorm`.
+`ideate` precedes `brainstorming`.
 
-- `ce-ideate` answers: "What are the strongest ideas worth exploring?"
-- `ce-brainstorm` answers: "What exactly should one chosen idea mean?" and writes a requirements-only unified plan under `docs/plans/`.
-- `ce-plan` answers: "How should it be built?"
+- `ideate` answers: "What are the strongest ideas worth exploring?"
+- `brainstorming` answers: "What exactly should one chosen idea mean?" and writes a requirements-only unified plan under `docs/plans/`.
+- `writing-plans` answers: "How should it be built?"
 
 This workflow produces a ranked ideation artifact — written to `docs/ideation/` when present, else a CE temp path (see Phase 4). It does **not** produce requirements, plans, or code.
 
@@ -41,7 +39,7 @@ If no argument is provided, proceed with open-ended ideation.
 
 1. **Ground before ideating** - Scan the actual codebase first. Do not generate abstract product advice detached from the repository.
 2. **Generate many -> critique all -> explain survivors only** - The quality mechanism is explicit rejection with reasons, not optimistic ranking. Do not let extra process obscure this pattern.
-3. **Route action into brainstorming** - Ideation identifies promising directions; `ce-brainstorm` defines the selected one precisely enough for planning. Do not skip to planning from ideation output.
+3. **Route action into brainstorming** - Ideation identifies promising directions; `brainstorming` defines the selected one precisely enough for planning. Do not skip to planning from ideation output.
 
 ## Model Tiers
 
@@ -65,7 +63,7 @@ When the subject, mode, and format are already clear from the prompt, resolve th
 
 Determine `OUTPUT_FORMAT` for the ideation artifact this run might persist. Output mode is **exclusive** — the ideation doc is written as either HTML (`.html`) OR markdown (`.md`), never both. Precedence: in-prompt request > user-stated preference > config > default (`html`), with a hard pipeline-mode override.
 
-Unlike `ce-plan` and `ce-brainstorm` (which default to `md`), ce-ideate defaults to **`html`** — ideation artifacts are read mainly by humans weighing candidate directions, and a rich self-contained HTML file (with illustrative diagrams for the top candidates) makes the ideas easier to approach.
+Unlike `writing-plans` and `brainstorming` (which default to `md`), ideate defaults to **`html`** — ideation artifacts are read mainly by humans weighing candidate directions, and a rich self-contained HTML file (with illustrative diagrams for the top candidates) makes the ideas easier to approach.
 
 **Read config.** Resolve `<repo-root>` at runtime by running `git rev-parse --show-toplevel` with the shell tool. Then read `<repo-root>/.compound-engineering/config.local.yaml` with the native file-read tool. If the root cannot be resolved (not a git repo) or the file does not exist, fall through to the defaults below.
 
@@ -83,7 +81,7 @@ Resolution steps:
 
 **Defer loading the format-rendering reference.** The deliverable is written at Phase 4 (after generation), so `references/ideation-sections.md` and the format-rendering references (`markdown-rendering.md` / `html-rendering.md`) are only needed then — loading them at Phase 0.0 would carry them through the entire grounding and ideation dispatch for no benefit. Resolve `OUTPUT_FORMAT` now, but load the section contract and the matching rendering reference at write time (see `references/post-ideation-workflow.md` §4.1).
 
-The `output:` preference does NOT auto-propagate to `ce-brainstorm` on handoff (Phase 5) — ce-brainstorm re-resolves its own `brainstorm_output` config independently. Asymmetric output (`ideation.html` + unified-plan markdown) is acceptable; users who want HTML for both set both keys in `.compound-engineering/config.local.yaml`.
+The `output:` preference does NOT auto-propagate to `brainstorming` on handoff (Phase 5) — brainstorming re-resolves its own `brainstorm_output` config independently. Asymmetric output (`ideation.html` + unified-plan markdown) is acceptable; users who want HTML for both set both keys in `.compound-engineering/config.local.yaml`.
 
 #### 0.1 Check for Recent Ideation Work
 
@@ -116,9 +114,9 @@ Before classifying mode or dispatching any grounding, check whether the subject 
 **Questioning principles (apply in this phase and in 0.4):**
 
 - Questions exist only to supply what sub-agents need to operate: an identifiable subject (this phase) and enough context for the agent to say something specific about it (0.4, elsewhere modes only). Nothing else.
-- Never ask about solution direction, constraints, audience, tone, success criteria, or anything that characterizes the subject — those belong to `ce-brainstorm`.
+- Never ask about solution direction, constraints, audience, tone, success criteria, or anything that characterizes the subject — those belong to `brainstorming`.
 - Always keep "Surprise me" (letting the agent decide the focus) as a real option, not a fallback for when the user can't name a subject. Ideation is allowed to be greenfield by design.
-- Stop as soon as the subject is identifiable or the user has delegated to "Surprise me." More than 3 total questions across 0.2 and 0.4 is a smell that ideation is not the right workflow — consider suggesting `ce-brainstorm`.
+- Stop as soon as the subject is identifiable or the user has delegated to "Surprise me." More than 3 total questions across 0.2 and 0.4 is a smell that ideation is not the right workflow — consider suggesting `brainstorming`.
 
 **Detection — issue-tracker intent (repo mode only; subject-identifying).**
 
