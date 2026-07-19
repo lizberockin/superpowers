@@ -5,6 +5,8 @@ description: Use when a problem was just solved, a durable project convention wa
 
 # Compound Learnings
 
+**See also:** `superpowers:writing-skills` — this skill documents a *one-off solved problem*, scoped to `docs/solutions/`. If the same technique keeps recurring across unrelated projects, that's a signal it should become a portable skill instead of another solutions doc — see `writing-skills` for that path.
+
 Coordinate multiple subagents working in parallel to document a recently solved problem.
 
 ## Purpose

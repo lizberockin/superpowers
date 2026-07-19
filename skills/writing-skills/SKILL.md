@@ -58,6 +58,8 @@ The entire skill creation process follows RED-GREEN-REFACTOR.
 - Project-specific conventions (put in your instructions file)
 - Mechanical constraints (if it's enforceable with regex/validation, automate it—save documentation for judgment calls)
 
+**Boundary with `compound-learnings`:** a one-off solved problem, scoped to one project, belongs in `docs/solutions/` via `superpowers:compound-learnings` — not here. Create a skill only once the same technique has recurred across unrelated projects; a `docs/solutions/` entry that keeps coming up in different repos is exactly that signal.
+
 ## Skill Types
 
 ### Technique
