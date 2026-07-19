@@ -86,7 +86,7 @@ When spawning subagents, pass the relevant file contents into the task prompt so
 <critical_requirement>
 **The primary deliverable is ONE file - the final documentation.**
 
-Phase 1 subagents write their full structured output to a per-run scratch artifact under `<run-dir>/` and return only a compact confirmation containing the artifact path. The orchestrator Reads those artifacts back in Phase 2 assembly. This is scratch space, identical in spirit to `ce-code-review`'s per-reviewer run artifacts; it does not make the scratch files additional deliverables. **Only the orchestrator writes product files** — the final solution doc and the maintenance side effects below. Subagents must not touch `docs/`, project instruction files, or any tracked path. Beyond the Phase 2 solution doc, the orchestrator may also write maintenance side effects — not additional deliverables, and creating one when absent is expected, not a violation of this rule. There are three write-target classes; only the first two are unconditional:
+Phase 1 subagents write their full structured output to a per-run scratch artifact under `<run-dir>/` and return only a compact confirmation containing the artifact path. The orchestrator Reads those artifacts back in Phase 2 assembly. This is scratch space for coordinating the run, not a deliverable — it does not make the scratch files additional deliverables. **Only the orchestrator writes product files** — the final solution doc and the maintenance side effects below. Subagents must not touch `docs/`, project instruction files, or any tracked path. Beyond the Phase 2 solution doc, the orchestrator may also write maintenance side effects — not additional deliverables, and creating one when absent is expected, not a violation of this rule. There are three write-target classes; only the first two are unconditional:
 - **`docs/solutions/...`** — the primary deliverable (always).
 - **`CONCEPTS.md`** — create or update in Phase 2.4 (Vocabulary Capture) when a qualifying domain term surfaces (Full mode; every mode that reaches vocabulary capture may refine an existing file).
 - **A project instruction file** (AGENTS.md or CLAUDE.md) — a small edit when the Discoverability Check finds a gap, **only in interactive Full mode after consent**. Headless and lightweight never apply this edit (they report or tip instead). Callers that hand off headless after an approval gate must not see an unreviewed change to the repo's operating contract.
@@ -737,8 +737,3 @@ Based on problem type, these local prompt assets can enhance documentation:
 ### When to Invoke
 - **Auto-triggered** (optional): Generic subagents seeded with local prompts can run post-documentation for enhancement
 - **Manual trigger**: after this completes, the user can separately ask for a deeper code-quality pass over the change (e.g. superpowers:requesting-code-review) if they want one — this skill doesn't do that itself.
-
-## Related Commands
-
-- `/research [topic]` - Deep investigation (searches docs/solutions/ for patterns)
-- `/ce-plan` - Planning workflow (references documented solutions)
