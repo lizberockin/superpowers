@@ -421,6 +421,7 @@ main() {
     replace_marked_block "$target_file" "$generated_file" > "$output_file"
     mv "$output_file" "$target_file"
     echo "Regenerated routing table in $target_file"
+    exit 0
   fi
 }
 
