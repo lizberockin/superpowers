@@ -15,6 +15,8 @@ description: Use when the user asks for ideas, improvements, surprising options,
 
 This workflow produces a ranked ideation artifact — written to `docs/ideation/` when present, else a CE temp path (see Phase 4). It does **not** produce requirements, plans, or code.
 
+**See also:** `superpowers:brainstorming` — use `brainstorming` when the user already has an idea in mind and wants to refine it through dialogue. Use `ideate` when they want AI-generated options first, via parallel research, before picking a direction to hand to `brainstorming`.
+
 ## Interaction Method
 
 Use the platform's blocking question tool: `AskUserQuestion` in Claude Code (call `ToolSearch` with `select:AskUserQuestion` first if its schema isn't loaded), `request_user_input` in Codex, `ask_question` in Antigravity CLI (`agy`), `ask_user` in Pi (requires the `pi-ask-user` extension). Fall back to numbered options in chat only when no blocking tool exists in the harness or the call errors (e.g., Codex edit modes) — not because a schema load is required. Never silently skip the question.
