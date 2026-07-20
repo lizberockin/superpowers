@@ -37,7 +37,7 @@ something goes wrong.
 A `description` that summarizes a skill's workflow causes an agent to
 follow the description instead of reading the skill body, skipping
 steps — reproduced, not hypothetical.
-See: [`writing-skills/SKILL.md` — Skill Discovery Optimization](skills/writing-skills/SKILL.md#skill-discovery-optimization)
+See: [`writing-skills/SKILL.md` — Skill Discovery Optimization (SDO)](skills/writing-skills/SKILL.md#skill-discovery-optimization-sdo)
 
 ### Conversation memory does not survive compaction
 Controllers that lose their place after compaction have re-dispatched
@@ -56,7 +56,7 @@ See: [`subagent-driven-development/SKILL.md` — Model Selection](skills/subagen
 A dispatch prompt should describe one task, not the session's history.
 A real dispatch was observed at 42k characters, 99% of it pasted
 prior-task summaries instead of the task at hand.
-See: [`subagent-driven-development/SKILL.md` — dispatch prompt guidance](skills/subagent-driven-development/SKILL.md#task-dispatch)
+See: [`subagent-driven-development/SKILL.md` — Constructing Reviewer Prompts](skills/subagent-driven-development/SKILL.md#constructing-reviewer-prompts)
 
 ## Per-Skill Red Flags / Common Mistakes
 
