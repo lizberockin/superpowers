@@ -30,7 +30,29 @@ When multiple skills apply, process skills come first — they set the approach,
 - "Let's build X" → superpowers:brainstorming first, then implementation skills.
 - "Fix this bug" → superpowers:systematic-debugging first, then domain skills.
 
+### Full Routing Reference
+
+<!-- BEGIN GENERATED ROUTING TABLE -->
+- You MUST use this before any creative work → superpowers:brainstorming
+- Use when a problem was just solved, a durable project convention was established, or project-specific vocabulary emerged → superpowers:compound-learnings
+- Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies → superpowers:dispatching-parallel-agents
+- Use when you have a written implementation plan to execute in a separate session with review checkpoints → superpowers:executing-plans
+- Use when implementation is complete, all tests pass, and you need to decide how to integrate the work → superpowers:finishing-a-development-branch
+- Use when the user asks for ideas, improvements, surprising options, or AI-generated directions before choosing one to develop → superpowers:ideate
+- Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable → superpowers:receiving-code-review
+- Use when completing tasks, implementing major features, or before merging to verify work meets requirements → superpowers:requesting-code-review
+- Use when executing implementation plans with independent tasks in the current session → superpowers:subagent-driven-development
+- Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes → superpowers:systematic-debugging
+- Use when implementing any feature or bugfix, before writing implementation code → superpowers:test-driven-development
+- Use when starting feature work that needs isolation from current workspace or before executing implementation plans → superpowers:using-git-worktrees
+- Use when about to claim work is complete, fixed, or passing, before committing or creating PRs → superpowers:verification-before-completion
+- Use when you have a spec or requirements for a multi-step task, before touching code → superpowers:writing-plans
+- Use when creating new skills, editing existing skills, or verifying skills work before deployment → superpowers:writing-skills
+<!-- END GENERATED ROUTING TABLE -->
+
 ## Red Flags
+
+For the full per-skill inventory, see [TROUBLESHOOTING.md](../../TROUBLESHOOTING.md).
 
 These thoughts mean STOP—you're rationalizing:
 
@@ -48,14 +70,6 @@ These thoughts mean STOP—you're rationalizing:
 | "I'll just do this one thing first" | Check BEFORE doing anything. |
 | "This feels productive" | Undisciplined action wastes time. Skills prevent this. |
 | "I know what that means" | Knowing the concept ≠ using the skill. Invoke it. |
-
-## Platform Adaptation
-
-If your harness appears here, read its reference file for special instructions:
-
-- Codex: `references/codex-tools.md`
-- Pi: `references/pi-tools.md`
-- Antigravity: `references/antigravity-tools.md`
 
 ## User Instructions
 
