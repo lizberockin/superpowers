@@ -60,6 +60,8 @@ design for approval — before any code gets written]
 
 ## What's Inside
 
+Hitting a wall? See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for known failure modes.
+
 ### Skills Library
 
 <!-- BEGIN GENERATED SKILL CATALOG -->

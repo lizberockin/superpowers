@@ -52,6 +52,8 @@ When multiple skills apply, process skills come first — they set the approach,
 
 ## Red Flags
 
+For the full per-skill inventory, see [TROUBLESHOOTING.md](../../TROUBLESHOOTING.md).
+
 These thoughts mean STOP—you're rationalizing:
 
 | Thought | Reality |
