@@ -102,6 +102,11 @@ skills/
   - **NEVER summarize the skill's process or workflow** (see SDO section for why)
   - Keep under 500 characters if possible
 
+> ⚠️ **Before you write this field:** a description that summarizes the
+> skill's workflow will cause agents to follow the description instead of
+> reading the skill — this has been reproduced. See "Skill Discovery
+> Optimization" below for the full explanation and examples.
+
 ```markdown
 ---
 name: Skill-Name-With-Hyphens
