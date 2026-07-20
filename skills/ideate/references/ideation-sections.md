@@ -1,6 +1,6 @@
 # Ideation Sections
 
-This is the section contract for the ce-ideate artifact — it describes
+This is the section contract for the ideate artifact — it describes
 *what* a persisted ideation document contains, independent of output
 format. It is paired with a format-rendering reference
 (`references/markdown-rendering.md` or `references/html-rendering.md`)
@@ -122,7 +122,7 @@ Two constraints on any visual you do add:
   deliberately directional overviews of a direction nobody has committed
   to yet. Keep them conceptual (contrast, analogy, rough flow). Detailed
   architecture, sequence diagrams, and wireframes belong downstream in
-  ce-brainstorm / ce-plan once a direction is chosen, not here.
+  brainstorming / writing-plans once a direction is chosen, not here.
 - **Keep the prose standing alone.** A reader who ignores the visual
   still gets the complete idea and its basis. The visual accelerates
   understanding; it never carries content found nowhere else.
