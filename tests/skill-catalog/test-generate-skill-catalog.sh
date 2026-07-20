@@ -170,6 +170,16 @@ test_missing_markers_errors_clearly() {
     fi
 }
 
+test_check_mode_passes_against_real_readme() {
+    local desc="--check exits 0 against the real README.md"
+
+    if "$GENERATOR" --check > /dev/null 2>&1; then
+        pass "$desc"
+    else
+        fail "$desc (expected exit 0 — real README.md catalog is stale)"
+    fi
+}
+
 echo "Running generate-skill-catalog.sh tests..."
 test_extraction_produces_16_skills_alphabetical
 test_brainstorming_quotes_stripped
@@ -178,6 +188,7 @@ test_check_mode_exits_1_when_stale
 test_check_mode_does_not_write
 test_default_mode_preserves_content_outside_markers
 test_missing_markers_errors_clearly
+test_check_mode_passes_against_real_readme
 
 if [ "$FAILURES" -eq 0 ]; then
     echo "All tests passed."
