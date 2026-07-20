@@ -257,12 +257,12 @@ if [ -L "$SCRATCH_ROOT" ]; then echo "unsafe scratch root symlink: $SCRATCH_ROOT
 install -d -m 700 "$SCRATCH_ROOT" || exit 1;
 if [ -L "$SCRATCH_ROOT" ] || [ ! -O "$SCRATCH_ROOT" ]; then echo "scratch root is not owned by the current user: $SCRATCH_ROOT" >&2; exit 1; fi;
 chmod 700 "$SCRATCH_ROOT" || exit 1;
-SCRATCH_DIR="$SCRATCH_ROOT/ce-ideate/<run-id>";
+SCRATCH_DIR="$SCRATCH_ROOT/ideate/<run-id>";
 (umask 077; mkdir -p "$SCRATCH_DIR") || exit 1; chmod 700 "$SCRATCH_DIR" || exit 1;
 echo "$SCRATCH_DIR";
 ```
 
-Use the echoed absolute path (`<scratch-root>/ce-ideate/<run-id>`) as `<scratch-dir>` for every subsequent checkpoint write and cache read in this run. The run directory is not deleted on completion — the V15 cache is session-scoped and reused across run-ids, the checkpoints follow the cross-invocation-reusable convention, and in the no-repo case the deliverable itself is written here (see `references/post-ideation-workflow.md` Phase 4 and §5.5).
+Use the echoed absolute path (`<scratch-root>/ideate/<run-id>`) as `<scratch-dir>` for every subsequent checkpoint write and cache read in this run. The run directory is not deleted on completion — the V15 cache is session-scoped and reused across run-ids, the checkpoints follow the cross-invocation-reusable convention, and in the no-repo case the deliverable itself is written here (see `references/post-ideation-workflow.md` Phase 4 and §5.5).
 
 Run grounding agents in parallel in the **foreground** (do not background — results are needed before Phase 2):
 
