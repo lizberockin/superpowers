@@ -62,27 +62,24 @@ design for approval — before any code gets written]
 
 ### Skills Library
 
-**Testing**
-- **test-driven-development** - RED-GREEN-REFACTOR cycle (includes testing anti-patterns reference)
-
-**Debugging**
-- **systematic-debugging** - 4-phase root cause process (includes root-cause-tracing, defense-in-depth, condition-based-waiting techniques)
-- **verification-before-completion** - Ensure it's actually fixed
-
-**Collaboration** 
-- **brainstorming** - Socratic design refinement
-- **writing-plans** - Detailed implementation plans
-- **executing-plans** - Batch execution with checkpoints
-- **dispatching-parallel-agents** - Concurrent subagent workflows
-- **requesting-code-review** - Pre-review checklist
-- **receiving-code-review** - Responding to feedback
-- **using-git-worktrees** - Parallel development branches
-- **finishing-a-development-branch** - Merge/PR decision workflow
-- **subagent-driven-development** - Fast iteration with two-stage review (spec compliance, then code quality)
-
-**Meta**
-- **writing-skills** - Create new skills following best practices (includes testing methodology)
-- **using-superpowers** - Introduction to the skills system
+<!-- BEGIN GENERATED SKILL CATALOG -->
+- **brainstorming** — You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.
+- **compound-learnings** — Use when a problem was just solved, a durable project convention was established, or project-specific vocabulary emerged — captures it as searchable documentation in docs/solutions/ or CONCEPTS.md before the context is lost.
+- **dispatching-parallel-agents** — Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies
+- **executing-plans** — Use when you have a written implementation plan to execute in a separate session with review checkpoints
+- **finishing-a-development-branch** — Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
+- **ideate** — Use when the user asks for ideas, improvements, surprising options, or AI-generated directions before choosing one to develop — generates and evaluates grounded ideas via parallel research subagents. Use brainstorming instead to refine an idea the user already has in mind.
+- **receiving-code-review** — Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation
+- **requesting-code-review** — Use when completing tasks, implementing major features, or before merging to verify work meets requirements
+- **subagent-driven-development** — Use when executing implementation plans with independent tasks in the current session
+- **systematic-debugging** — Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
+- **test-driven-development** — Use when implementing any feature or bugfix, before writing implementation code
+- **using-git-worktrees** — Use when starting feature work that needs isolation from current workspace or before executing implementation plans - ensures an isolated workspace exists via native tools or git worktree fallback
+- **using-superpowers** — Use when starting any conversation - establishes how to find and use skills, requiring skill invocation before ANY response including clarifying questions
+- **verification-before-completion** — Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
+- **writing-plans** — Use when you have a spec or requirements for a multi-step task, before touching code
+- **writing-skills** — Use when creating new skills, editing existing skills, or verifying skills work before deployment
+<!-- END GENERATED SKILL CATALOG -->
 
 ## Philosophy
 
