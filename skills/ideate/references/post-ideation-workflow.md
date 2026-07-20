@@ -85,7 +85,7 @@ The deliverable already exists (Phase 4), so the menu is purely *what next* — 
 
 **Stem:** "Your ideation is saved to `<path>`. What next?"
 
-Offer four options (self-contained labels with the distinguishing word front-loaded so they stay distinct when truncated). Option 1 is **format-keyed** — render exactly one of its two labels per run, matching `OUTPUT_FORMAT`:
+Offer three or four options (self-contained labels with the distinguishing word front-loaded so they stay distinct when truncated). Option 1 is **format-keyed** — present only when `OUTPUT_FORMAT=html`; omitted entirely for markdown, dropping the menu to three options:
 
 1. *(when `OUTPUT_FORMAT=html`, otherwise this option is omitted and the menu has three options)* **Open in browser** — open the saved HTML deliverable (re-open if it was already opened).
 2. **Brainstorm one idea with `brainstorming`** — hand the chosen idea to superpowers' `brainstorming` skill to turn into an approved design. Leaves `ideate`. Asks which idea first.
