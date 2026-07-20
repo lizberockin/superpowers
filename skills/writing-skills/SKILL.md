@@ -58,6 +58,8 @@ The entire skill creation process follows RED-GREEN-REFACTOR.
 - Project-specific conventions (put in your instructions file)
 - Mechanical constraints (if it's enforceable with regex/validation, automate it—save documentation for judgment calls)
 
+**Boundary with `compound-learnings`:** a one-off solved problem, scoped to one project, belongs in `docs/solutions/` via `superpowers:compound-learnings` — not here. Create a skill only once the same technique has recurred across unrelated projects; a `docs/solutions/` entry that keeps coming up in different repos is exactly that signal.
+
 ## Skill Types
 
 ### Technique
@@ -101,6 +103,11 @@ skills/
   - Include specific symptoms, situations, and contexts
   - **NEVER summarize the skill's process or workflow** (see SDO section for why)
   - Keep under 500 characters if possible
+
+> ⚠️ **Before you write this field:** a description that summarizes the
+> skill's workflow will cause agents to follow the description instead of
+> reading the skill — this has been reproduced. See "Skill Discovery
+> Optimization" below for the full explanation and examples.
 
 ```markdown
 ---
