@@ -31,6 +31,15 @@ Or via the Superpowers marketplace:
 
 Both marketplaces install the identical plugin; pick whichever you already have configured.
 
+## See it in action
+
+> "Let's build a rate limiter for the API"
+
+Agent: *Using brainstorming to explore the rate limiter design...*
+
+[asks clarifying questions, proposes approaches, presents a
+design for approval — before any code gets written]
+
 ## The Basic Workflow
 
 1. **brainstorming** - Activates before writing code. Refines rough ideas through questions, explores alternatives, presents design in sections for validation. Saves design document.
