@@ -81,79 +81,52 @@ sections. Read a section in full before doing its step; do not work from memory.
 
 | When | Read this section |
 |------|-------------------|
-| running the 4-section review, outside voice, required outputs, and review report (only after Step 0 scope is agreed) | `sections/review-sections.md` |
+| running the 4-section review, outside voice, required outputs, and review report (only after Step 0 scope is agreed) | `review-sections.md` |
 ---
 
 
 ## BEFORE YOU START:
 
 ### Design Doc Check
-```bash
-setopt +o nomatch 2>/dev/null || true  # zsh compat
-SLUG=$(~/.claude/skills/gstack/browse/bin/remote-slug 2>/dev/null || basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
-BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | tr '/' '-' || echo 'no-branch')
-DESIGN=$(ls -t ~/.gstack/projects/$SLUG/*-$BRANCH-design-*.md 2>/dev/null | head -1)
-[ -z "$DESIGN" ] && DESIGN=$(ls -t ~/.gstack/projects/$SLUG/*-design-*.md 2>/dev/null | head -1)
-[ -n "$DESIGN" ] && echo "Design doc found: $DESIGN" || echo "No design doc found"
-```
-If a design doc exists, read it. Use it as the source of truth for the problem statement, constraints, and chosen approach. If it has a `Supersedes:` field, note that this is a revised design — check the prior version for context on what changed and why.
+
+Look for a design doc for this change, in order:
+
+1. **Standard location:** check `docs/superpowers/office-hours/*.md` for a file whose `Branch:` header matches the current branch:
+   ```bash
+   BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'no-branch')
+   DESIGN=$(grep -l "^Branch: $BRANCH$" docs/superpowers/office-hours/*.md 2>/dev/null | xargs ls -t 2>/dev/null | head -1)
+   [ -n "$DESIGN" ] && echo "Design doc found: $DESIGN" || echo "No design doc found for this branch"
+   ```
+   If found, read it. Use it as the source of truth for the problem statement, constraints, and chosen approach. If it has a `Supersedes:` field, note that this is a revised design — check the prior version for context on what changed and why.
+2. **If not found**, ask the user directly via AskUserQuestion: "No design doc found for this branch under `docs/superpowers/office-hours/`. Does one exist somewhere else?" Options: A) Yes — I'll point you to it B) No design doc exists. If they point to a path, read it and use it as above.
+3. **If still not found**, fall through to the Prerequisite Skill Offer below.
 
 ## Prerequisite Skill Offer
 
-When the design doc check above prints "No design doc found," offer the prerequisite
-skill before proceeding.
+When no design doc was found (step 3 above), offer the prerequisite skill before proceeding.
 
 Say to the user via AskUserQuestion:
 
-> "No design doc found for this branch. `/office-hours` produces a structured problem
+> "No design doc found for this branch. `office-hours` produces a structured problem
 > statement, premise challenge, and explored alternatives — it gives this review much
 > sharper input to work with. Takes about 10 minutes. The design doc is per-feature,
 > not per-product — it captures the thinking behind this specific change."
 
 Options:
-- A) Run /office-hours now (we'll pick up the review right after)
+- A) Run office-hours now (we'll pick up the review right after)
 - B) Skip — proceed with standard review
 
 If they skip: "No worries — standard review. If you ever want sharper input, try
-/office-hours first next time." Then proceed normally. Do not re-offer later in the session.
+office-hours first next time." Then proceed normally. Do not re-offer later in the session.
 
-If they choose A:
+If they choose A: invoke `superpowers:office-hours` via the Skill tool and let it run to
+full completion. It has no boilerplate left to double-execute, so there is no skip-list
+to apply here — just run it end to end. Say first: "Running office-hours now. Once the
+design doc is ready, I'll pick up the review right where we left off."
 
-Say: "Running /office-hours inline. Once the design doc is ready, I'll pick up
-the review right where we left off."
-
-Read the `/office-hours` skill file at `~/.claude/skills/gstack/office-hours/SKILL.md` using the Read tool.
-
-**If unreadable:** Skip with "Could not load /office-hours — skipping." and continue.
-
-Follow its instructions from top to bottom, **skipping these sections** (already handled by the parent skill):
-- Preamble (run first)
-- AskUserQuestion Format
-- Completeness Principle — Boil the Ocean
-- Search Before Building
-- Contributor Mode
-- Completion Status Protocol
-- Telemetry (run last)
-- Step 0: Detect platform and base branch
-- Review Readiness Dashboard
-- Plan File Review Report
-- Prerequisite Skill Offer
-- Plan Status Footer
-
-Execute every other section at full depth. When the loaded skill's instructions are complete, continue with the next step below.
-
-After /office-hours completes, re-run the design doc check:
-```bash
-setopt +o nomatch 2>/dev/null || true  # zsh compat
-SLUG=$(~/.claude/skills/gstack/browse/bin/remote-slug 2>/dev/null || basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
-BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | tr '/' '-' || echo 'no-branch')
-DESIGN=$(ls -t ~/.gstack/projects/$SLUG/*-$BRANCH-design-*.md 2>/dev/null | head -1)
-[ -z "$DESIGN" ] && DESIGN=$(ls -t ~/.gstack/projects/$SLUG/*-design-*.md 2>/dev/null | head -1)
-[ -n "$DESIGN" ] && echo "Design doc found: $DESIGN" || echo "No design doc found"
-```
-
-If a design doc is now found, read it and continue the review.
-If none was produced (user may have cancelled), proceed with standard review.
+After it completes, re-run the Design Doc Check above. If a design doc is now found,
+read it and continue the review. If none was produced (the user may have cancelled),
+proceed with standard review.
 
 ### Step 0: Scope Challenge
 
@@ -170,10 +143,10 @@ Before reviewing anything, answer these questions:
 
    If WebSearch is unavailable, skip this check and note: "Search unavailable — proceeding with in-distribution knowledge only."
 
-   If the plan rolls a custom solution where a built-in exists, flag it as a scope reduction opportunity. Annotate recommendations with **[Layer 1]**, **[Layer 2]**, **[Layer 3]**, or **[EUREKA]** (see preamble's Search Before Building section). If you find a eureka moment — a reason the standard approach is wrong for this case — present it as an architectural insight.
+   If the plan rolls a custom solution where a built-in exists, flag it as a scope reduction opportunity. Annotate recommendations with **[Layer 1]**, **[Layer 2]**, **[Layer 3]**, or **[EUREKA]** — Layer 1 is the tried-and-true approach (don't reinvent it), Layer 2 is what's new and popular (scrutinize it), Layer 3 is first-principles reasoning (prize it above all). If you find a eureka moment — a reason the standard approach is wrong for this case — present it as an architectural insight.
 5. **TODOS cross-reference:** Read `TODOS.md` if it exists. Are any deferred items blocking this plan? Can any deferred items be bundled into this PR without expanding scope? Does this plan create new work that should be captured as a TODO?
 
-5. **Completeness check:** Is the plan doing the complete version or a shortcut? With AI-assisted coding, the cost of completeness (100% test coverage, full edge case handling, complete error paths) is 10-100x cheaper than with a human team. If the plan proposes a shortcut that saves human-hours but only saves minutes with CC+gstack, recommend the complete version. Boil the ocean.
+5. **Completeness check:** Is the plan doing the complete version or a shortcut? With AI-assisted coding, the cost of completeness (100% test coverage, full edge case handling, complete error paths) is 10-100x cheaper than with a human team. If the plan proposes a shortcut that saves human-hours but only saves minutes with an AI coding assistant, recommend the complete version. Boil the ocean.
 
 6. **Distribution check:** If the plan introduces a new artifact type (CLI binary, library package, container image, mobile app), does it include the build/publish pipeline? Code without distribution is code nobody can use. Check:
    - Is there a CI/CD workflow for building and publishing the artifact?
@@ -191,12 +164,12 @@ Always work through the full interactive review: one section at a time (Architec
 
 **Critical: Once the user accepts or rejects a scope reduction recommendation, commit fully.** Do not re-argue for smaller scope during later review sections. Do not silently reduce scope or skip planned components.
 
-> **STOP.** Before running the 4-section review, outside voice, required outputs, and review report (only after Step 0 scope is agreed), Read `~/.claude/skills/gstack/plan-eng-review/sections/review-sections.md` and execute it
+> **STOP.** Before running the 4-section review, outside voice, required outputs, and review report (only after Step 0 scope is agreed), Read `review-sections.md` and execute it
 > in full. Do not work from memory — that section is the source of truth for this step.
 
 ## Section self-check (before you finish)
 
-Confirm you Read the review section the Section index named, and executed every review section (Architecture, Code Quality, Tests, Performance), the outside voice, and the required outputs in full. If you produced findings or the review report from memory without Reading `sections/review-sections.md`, stop and Read it now.
+Confirm you Read the review section the Section index named, and executed every review section (Architecture, Code Quality, Tests, Performance), the outside voice, and the required outputs in full. If you produced findings or the review report from memory without Reading `review-sections.md`, stop and Read it now.
 
 ## EXIT PLAN MODE GATE (BLOCKING)
 

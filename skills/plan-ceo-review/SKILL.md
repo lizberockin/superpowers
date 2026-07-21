@@ -122,125 +122,61 @@ git log --since=30.days --name-only --format="" | sort | uniq -c | sort -rn | he
 ```
 Then read CLAUDE.md, TODOS.md, and any existing architecture docs.
 
-**Design doc check:**
-```bash
-setopt +o nomatch 2>/dev/null || true  # zsh compat
-SLUG=$(~/.claude/skills/gstack/browse/bin/remote-slug 2>/dev/null || basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
-BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | tr '/' '-' || echo 'no-branch')
-DESIGN=$(ls -t ~/.gstack/projects/$SLUG/*-$BRANCH-design-*.md 2>/dev/null | head -1)
-[ -z "$DESIGN" ] && DESIGN=$(ls -t ~/.gstack/projects/$SLUG/*-design-*.md 2>/dev/null | head -1)
-[ -n "$DESIGN" ] && echo "Design doc found: $DESIGN" || echo "No design doc found"
-```
-If a design doc exists (from `/office-hours`), read it. Use it as the source of truth for the problem statement, constraints, and chosen approach. If it has a `Supersedes:` field, note that this is a revised design.
+## Design Doc Check
 
-**Handoff note check** (reuses $SLUG and $BRANCH from the design doc check above):
-```bash
-setopt +o nomatch 2>/dev/null || true  # zsh compat
-HANDOFF=$(ls -t ~/.gstack/projects/$SLUG/*-$BRANCH-ceo-handoff-*.md 2>/dev/null | head -1)
-[ -n "$HANDOFF" ] && echo "HANDOFF_FOUND: $HANDOFF" || echo "NO_HANDOFF"
-```
-If this block runs in a separate shell from the design doc check, recompute $SLUG and $BRANCH first using the same commands from that block.
-If a handoff note is found: read it. This contains system audit findings and discussion
-from a prior CEO review session that paused so the user could run `/office-hours`. Use it
-as additional context alongside the design doc. The handoff note helps you avoid re-asking
-questions the user already answered. Do NOT skip any steps — run the full review, but use
-the handoff note to inform your analysis and avoid redundant questions.
+Look for a design doc for this change, in order:
 
-Tell the user: "Found a handoff note from your prior CEO review session. I'll use that
-context to pick up where we left off."
+1. **Standard location:** check `docs/superpowers/office-hours/*.md` for a file whose `Branch:` header matches the current branch:
+   ```bash
+   BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'no-branch')
+   DESIGN=$(grep -l "^Branch: $BRANCH$" docs/superpowers/office-hours/*.md 2>/dev/null | xargs ls -t 2>/dev/null | head -1)
+   [ -n "$DESIGN" ] && echo "Design doc found: $DESIGN" || echo "No design doc found for this branch"
+   ```
+   If found, read it. Use it as the source of truth for the problem statement, constraints, and chosen approach. If it has a `Supersedes:` field, note that this is a revised design.
+2. **If not found**, ask the user directly via AskUserQuestion: "No design doc found for this branch under `docs/superpowers/office-hours/`. Does one exist somewhere else?" Options: A) Yes — I'll point you to it B) No design doc exists. If they point to a path, read it and use it as above.
+3. **If still not found**, fall through to the Prerequisite Skill Offer below.
 
 ## Prerequisite Skill Offer
 
-When the design doc check above prints "No design doc found," offer the prerequisite
-skill before proceeding.
+When no design doc was found (step 3 above), offer the prerequisite skill before proceeding.
 
 Say to the user via AskUserQuestion:
 
-> "No design doc found for this branch. `/office-hours` produces a structured problem
+> "No design doc found for this branch. `office-hours` produces a structured problem
 > statement, premise challenge, and explored alternatives — it gives this review much
 > sharper input to work with. Takes about 10 minutes. The design doc is per-feature,
 > not per-product — it captures the thinking behind this specific change."
 
 Options:
-- A) Run /office-hours now (we'll pick up the review right after)
+- A) Run office-hours now (we'll pick up the review right after)
 - B) Skip — proceed with standard review
 
 If they skip: "No worries — standard review. If you ever want sharper input, try
-/office-hours first next time." Then proceed normally. Do not re-offer later in the session.
+office-hours first next time." Then proceed normally. Do not re-offer later in the session.
 
-If they choose A:
+If they choose A: invoke `superpowers:office-hours` via the Skill tool and let it run to
+full completion. It has no boilerplate left to double-execute, so there is no skip-list
+to apply here — just run it end to end. Say first: "Running office-hours now. Once the
+design doc is ready, I'll pick up the review right where we left off."
 
-Say: "Running /office-hours inline. Once the design doc is ready, I'll pick up
-the review right where we left off."
-
-Read the `/office-hours` skill file at `~/.claude/skills/gstack/office-hours/SKILL.md` using the Read tool.
-
-**If unreadable:** Skip with "Could not load /office-hours — skipping." and continue.
-
-Follow its instructions from top to bottom, **skipping these sections** (already handled by the parent skill):
-- Preamble (run first)
-- AskUserQuestion Format
-- Completeness Principle — Boil the Ocean
-- Search Before Building
-- Contributor Mode
-- Completion Status Protocol
-- Telemetry (run last)
-- Step 0: Detect platform and base branch
-- Review Readiness Dashboard
-- Plan File Review Report
-- Prerequisite Skill Offer
-- Plan Status Footer
-
-Execute every other section at full depth. When the loaded skill's instructions are complete, continue with the next step below.
-
-After /office-hours completes, re-run the design doc check:
-```bash
-setopt +o nomatch 2>/dev/null || true  # zsh compat
-SLUG=$(~/.claude/skills/gstack/browse/bin/remote-slug 2>/dev/null || basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
-BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | tr '/' '-' || echo 'no-branch')
-DESIGN=$(ls -t ~/.gstack/projects/$SLUG/*-$BRANCH-design-*.md 2>/dev/null | head -1)
-[ -z "$DESIGN" ] && DESIGN=$(ls -t ~/.gstack/projects/$SLUG/*-design-*.md 2>/dev/null | head -1)
-[ -n "$DESIGN" ] && echo "Design doc found: $DESIGN" || echo "No design doc found"
-```
-
-If a design doc is now found, read it and continue the review.
-If none was produced (user may have cancelled), proceed with standard review.
+After it completes, re-run the Design Doc Check above. If a design doc is now found,
+read it and continue the review. If none was produced (the user may have cancelled),
+proceed with standard review.
 
 **Mid-session detection:** During Step 0A (Premise Challenge), if the user can't
 articulate the problem, keeps changing the problem statement, answers with "I'm not
-sure," or is clearly exploring rather than reviewing — offer `/office-hours`:
+sure," or is clearly exploring rather than reviewing — offer `office-hours`:
 
 > "It sounds like you're still figuring out what to build — that's totally fine, but
-> that's what /office-hours is designed for. Want to run /office-hours right now?
+> that's what office-hours is designed for. Want to run it right now?
 > We'll pick up right where we left off."
 
-Options: A) Yes, run /office-hours now. B) No, keep going.
+Options: A) Yes, run office-hours now. B) No, keep going.
 If they keep going, proceed normally — no guilt, no re-asking.
 
-If they choose A:
-
-Read the `/office-hours` skill file at `~/.claude/skills/gstack/office-hours/SKILL.md` using the Read tool.
-
-**If unreadable:** Skip with "Could not load /office-hours — skipping." and continue.
-
-Follow its instructions from top to bottom, **skipping these sections** (already handled by the parent skill):
-- Preamble (run first)
-- AskUserQuestion Format
-- Completeness Principle — Boil the Ocean
-- Search Before Building
-- Contributor Mode
-- Completion Status Protocol
-- Telemetry (run last)
-- Step 0: Detect platform and base branch
-- Review Readiness Dashboard
-- Plan File Review Report
-- Prerequisite Skill Offer
-- Plan Status Footer
-
-Execute every other section at full depth. When the loaded skill's instructions are complete, continue with the next step below.
-
-Note current Step 0A progress so you don't re-ask questions already answered.
-After completion, re-run the design doc check and resume the review.
+If they choose A: invoke `superpowers:office-hours` via the Skill tool, the same way as
+above. Note current Step 0A progress so you don't re-ask questions already answered.
+After completion, re-run the Design Doc Check and resume the review.
 
 When reading TODOS.md, specifically:
 * Note any TODOs this plan touches, blocks, or unlocks
@@ -300,7 +236,7 @@ sections. Read a section in full before doing its step; do not work from memory.
 
 | When | Read this section |
 |------|-------------------|
-| running the 11-section deep review, required outputs, and review report (only after Step 0 scope and mode are agreed) | `sections/review-sections.md` |
+| running the 11-section deep review, required outputs, and review report (only after Step 0 scope and mode are agreed) | `review-sections.md` |
 
 ## Step 0: Nuclear Scope Challenge + Mode Selection
 
@@ -547,12 +483,12 @@ Call AskUserQuestion directly to present these mode options: include RECOMMENDAT
 **STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. If this section turned up zero findings, state "No issues, moving on" and proceed. If the section has findings, you MUST call AskUserQuestion as a tool_use — a finding with an "obvious fix" is still a finding and still needs user approval before any change lands in the plan. Do NOT proceed until the user responds.
 **Reminder: Do NOT make any code changes. Review only.**
 
-> **STOP.** Before running the 11-section deep review, required outputs, and review report (only after Step 0 scope and mode are agreed), Read `~/.claude/skills/gstack/plan-ceo-review/sections/review-sections.md` and execute it
+> **STOP.** Before running the 11-section deep review, required outputs, and review report (only after Step 0 scope and mode are agreed), Read `review-sections.md` and execute it
 > in full. Do not work from memory — that section is the source of truth for this step.
 
 ## Section self-check (before you finish)
 
-You ran a carved skill. The Section index above named `sections/review-sections.md`
+You ran a carved skill. The Section index above named `review-sections.md`
 as the source of truth for the 11-section deep review, the required outputs, and the
 review report. Confirm you issued a Read for it and executed every section from the
 file, not from memory. If you produced the Completion Summary or wrote the review
