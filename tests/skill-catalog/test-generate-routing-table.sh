@@ -46,8 +46,8 @@ EOF
     printf '%s\n' "$file"
 }
 
-test_extraction_produces_15_entries_alphabetical() {
-    local desc="extraction produces 15 entries (excludes using-superpowers), alphabetically sorted"
+test_extraction_produces_16_entries_alphabetical() {
+    local desc="extraction produces 16 entries (excludes using-superpowers), alphabetically sorted"
     local target
     target="$(make_target_file "extraction.md")"
 
@@ -58,10 +58,10 @@ test_extraction_produces_15_entries_alphabetical() {
 
     local count
     count="$(printf '%s\n' "$block" | grep -c 'superpowers:')"
-    if [ "$count" -eq 15 ]; then
-        pass "$desc (15 entries)"
+    if [ "$count" -eq 16 ]; then
+        pass "$desc (16 entries)"
     else
-        fail "$desc (expected 15 entries, got $count)"
+        fail "$desc (expected 16 entries, got $count)"
         printf '%s\n' "$block" | sed 's/^/      /'
     fi
 
@@ -209,7 +209,7 @@ test_check_mode_passes_against_real_using_superpowers() {
 }
 
 echo "Running generate-routing-table.sh tests..."
-test_extraction_produces_15_entries_alphabetical
+test_extraction_produces_16_entries_alphabetical
 test_brainstorming_omits_use_when_prefix
 test_separator_styles_both_truncate
 test_check_mode_exits_0_when_in_sync

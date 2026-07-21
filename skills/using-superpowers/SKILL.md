@@ -39,6 +39,7 @@ When multiple skills apply, process skills come first — they set the approach,
 - Use when you have a written implementation plan to execute in a separate session with review checkpoints → superpowers:executing-plans
 - Use when implementation is complete, all tests pass, and you need to decide how to integrate the work → superpowers:finishing-a-development-branch
 - Use when the user asks for ideas, improvements, surprising options, or AI-generated directions before choosing one to develop → superpowers:ideate
+- Use when the user has a new product/project idea, asks whether something is worth building, wants to think through design decisions for something that doesn't exist yet, or is exploring a concept before any code is written → superpowers:office-hours
 - Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable → superpowers:receiving-code-review
 - Use when completing tasks, implementing major features, or before merging to verify work meets requirements → superpowers:requesting-code-review
 - Use when executing implementation plans with independent tasks in the current session → superpowers:subagent-driven-development
