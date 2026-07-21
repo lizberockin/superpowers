@@ -1,26 +1,28 @@
-<!-- AUTO-GENERATED from design-and-handoff.md.tmpl — do not edit directly -->
-<!-- Regenerate: bun run gen:skill-docs -->
 ## Phase 5: Design Doc
 
-Write the design document to the project directory.
+Write the design document into the repo.
 
 ```bash
-eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)" && mkdir -p ~/.gstack/projects/$SLUG
-USER=$(whoami)
-DATETIME=$(date +%Y%m%d-%H%M%S)
+mkdir -p docs/superpowers/office-hours
+BRANCH=$(git branch --show-current 2>/dev/null || echo 'no-branch')
+DATE=$(date +%Y-%m-%d)
 ```
 
-**Design lineage:** Before writing, check for existing design docs on this branch:
+Choose a short kebab-case topic slug for this session (e.g. `todo-app`,
+`auth-redesign`) — same convention `brainstorming` uses for its own spec
+filenames.
+
+**Design lineage:** Before writing, check for an existing office-hours doc on
+this branch (match on the doc's `Branch:` header field, not the filename):
 ```bash
-setopt +o nomatch 2>/dev/null || true  # zsh compat
-PRIOR=$(ls -t ~/.gstack/projects/$SLUG/*-$BRANCH-design-*.md 2>/dev/null | head -1)
+PRIOR=$(grep -l "^Branch: $BRANCH$" docs/superpowers/office-hours/*.md 2>/dev/null | xargs ls -t 2>/dev/null | head -1)
 ```
 If `$PRIOR` exists, the new doc gets a `Supersedes:` field referencing it. This creates a revision chain — you can trace how a design evolved across office hours sessions.
 
-Write to `~/.gstack/projects/{slug}/{user}-{branch}-design-{datetime}.md`.
+Write to `docs/superpowers/office-hours/{date}-{topic-slug}-office-hours.md`.
 
 After writing the design doc, tell the user:
-**"Design doc saved to: {full path}. Other skills (/plan-ceo-review, /plan-eng-review) will find it automatically."**
+**"Design doc saved to: {full path}. A future `plan-ceo-review` or `plan-eng-review` will find it automatically."**
 
 ### Startup mode design doc template:
 
