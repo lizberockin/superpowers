@@ -123,11 +123,18 @@ Reordered from the original draft: `compound-learnings` now lands first because 
 
 **Phase 2a — office-hours.** Fully specified in [`2026-07-20-office-hours-port-design.md`](2026-07-20-office-hours-port-design.md), including several calls that surfaced only after reading the actual source file (a 315-line cross-session relationship-tiering system to drop, an AI-image-generation mockup pipeline to drop in favor of reusing `brainstorming`'s Visual Companion, and a hand-off style decision: prose mention only, no active `Skill`-tool invocation into `brainstorming`).
 
-**Phase 2b — plan-ceo-review, plan-eng-review (not yet specified).** Deferred to its own future spec. Expected to follow the same general shape as the original Phase 2 plan below, plus explicit design work on the "Prerequisite Skill Offer" pattern (Phase 2a's spec left it untouched on purpose):
-1. Copy `sections/*.md` (not `.tmpl`) into each skill directory — flat next to `SKILL.md` if 1-2 files, a `references/` subfolder if more, matching whichever pattern the receiving skill's file count warrants (superpowers doesn't use `references/` uniformly — e.g. `writing-skills/` nests `examples/` but most skills keep supporting files flat).
-2. Rewrite each `SKILL.md`: strip frontmatter to `name`/`description`; delete the "Preamble (run first)" block; replace `gbrain` context-gathering with the two-tier wiki-then-specs/git-log step (Decision 4); replace the passive section-manifest's gstack `$schema` and re-point `sections/*.md` references to the new paths; collapse `SESSION_KIND` branches to interactive-only (Decision 8); rewrite the description field to "Use when..." form per `writing-skills`.
-3. Add a short "See also" line in each: `plan-ceo-review` and `plan-eng-review` → mention `office-hours` as a useful predecessor (carrying forward `benefits-from` as prose) and each other as companion reviews. Decide whether the "Prerequisite Skill Offer" pattern (currently an active inline-execution of office-hours) survives as-is, degrades to prose like Phase 2a did, or takes a third shape — genuinely open, not decided by Phase 2a.
-4. Run each rewritten skill through the `writing-skills` TDD loop (pressure-test with a subagent, since neither of these has ever been tested against superpowers' own bar) before merging.
+**Phase 2b — plan-ceo-review, plan-eng-review.** Fully specified in
+[`2026-07-20-plan-ceo-eng-review-port-design.md`](2026-07-20-plan-ceo-eng-review-port-design.md).
+Both skills ported together (they share the large majority of their
+translation decisions). Notable calls: the "Prerequisite Skill Offer"
+pattern resolves to active `Skill`-tool invocation of `office-hours` (a
+pre-work gate, not a completion handoff, so it doesn't conflict with Phase
+2a's prose-only handoff precedent); a new repo-root `TODOS.md` convention
+and a new `docs/superpowers/ceo-plans/` directory are introduced; the
+source's 8-skill Review Readiness Dashboard is dropped in favor of a
+self-contained check against the plan file's own review-report headings,
+since 6 of its 8 data sources (`/autoplan`, `/plan-design-review`,
+`/adversarial-review`, `/codex-review`) aren't being ported.
 
 **Phase 3 — wiki consultation retrofits + integration polish**
 1. Apply the wiki-consultation edits from the table above to `systematic-debugging`, `writing-plans`, `brainstorming`, `finishing-a-development-branch`, `requesting-code-review`, `receiving-code-review`, and `writing-skills`. Each is a small, additive step/paragraph — not a rewrite of the skill's core methodology — but these are already-tuned, frequently-triggered skills. Pressure-test each edit per `writing-skills` (baseline vs. with-the-addition, per its RED/GREEN methodology) before merging rather than assuming an additive line is automatically safe.
