@@ -70,7 +70,7 @@ sections. Read a section in full before doing its step; do not work from memory.
 
 | When | Read this section |
 |------|-------------------|
-| writing the design doc and running the tiered relationship handoff (Phases 5-6, after the conversation and alternatives are done) | `sections/design-and-handoff.md` |
+| writing the design doc and handoff (Phases 5-6, after the conversation and alternatives are done) | `design-and-handoff.md` |
 ---
 
 ## Phase 2A: Startup Mode — YC Product Diagnostic
@@ -329,7 +329,7 @@ Read the top 2-3 results. Run the three-layer synthesis:
 - **[Layer 2]** What are the search results and current discourse saying?
 - **[Layer 3]** Given what WE learned in Phase 2A/2B — is there a reason the conventional approach is wrong?
 
-**Eureka check:** If Layer 3 reasoning reveals a genuine insight, name it: "EUREKA: Everyone does X because they assume [assumption]. But [evidence from our conversation] suggests that's wrong here. This means [implication]." Log the eureka moment (see preamble).
+**Eureka check:** If Layer 3 reasoning reveals a genuine insight, name it: "EUREKA: Everyone does X because they assume [assumption]. But [evidence from our conversation] suggests that's wrong here. This means [implication]." Treat this as a candidate for `compound-learnings` at session end (see Capture Learnings).
 
 If no eureka moment exists, say: "The conventional wisdom seems sound here. Let's build on it." Proceed to Phase 3.
 
@@ -388,7 +388,7 @@ If B: skip Phase 3.5 entirely. Remember that the second opinion did NOT run (aff
 2. **Write the assembled prompt to a temp file** (prevents shell injection from user-derived content):
 
 ```bash
-CODEX_PROMPT_FILE=$(mktemp /tmp/gstack-codex-oh-XXXXXXXX.txt)
+CODEX_PROMPT_FILE=$(mktemp /tmp/codex-oh-XXXXXXXX.txt)
 ```
 
 Write the full prompt to this file. **Always start with the filesystem boundary:**
@@ -613,69 +613,33 @@ Track which of these signals appeared during the session:
 - Showed **agency** — actually building, not just planning
 - **Defended premise with reasoning** against cross-model challenge (kept original premise when Codex disagreed AND articulated specific reasoning for why — dismissal without reasoning does not count)
 
-Count the signals. You'll use this count in Phase 6 to determine which tier of closing message to use.
-
-### Builder Profile Append
-
-After counting signals, append a session entry to the builder profile. This is the single
-source of truth for all closing state (tier, resource dedup, journey tracking). The
-`gstack-developer-profile --log-session` binary handles its own directory creation
-and writes via atomic mktemp+mv to `~/.gstack/developer-profile.json`.
-
-Append one JSON line with these fields (substitute actual values from this session):
-- `date`: current ISO 8601 timestamp
-- `mode`: "startup" or "builder" (from Phase 1 mode selection)
-- `project_slug`: the SLUG value from the preamble
-- `signal_count`: number of signals counted above
-- `signals`: array of signal names observed (e.g., `["named_users", "pushback", "taste"]`)
-- `design_doc`: path to the design doc that will be written in Phase 5 (construct it now)
-- `assignment`: the assignment you will give in the design doc's "The Assignment" section
-- `resources_shown`: empty array `[]` for now (populated after resource selection in Phase 6)
-- `topics`: array of 2-3 topic keywords that describe what this session was about
-
-```bash
-~/.claude/skills/gstack/bin/gstack-developer-profile --log-session '{"date":"TIMESTAMP","mode":"MODE","project_slug":"SLUG","signal_count":N,"signals":SIGNALS_ARRAY,"design_doc":"DOC_PATH","assignment":"ASSIGNMENT_TEXT","resources_shown":[],"topics":TOPICS_ARRAY}' 2>/dev/null || true
-```
-
-The session entry is appended to `developer-profile.json`'s `sessions[]` array. A second
-session entry with `mode: "resources"` is appended via `--log-session` after resource
-selection in Phase 6 Beat 3.5.
+Count the signals. These feed the design doc's "What I noticed about how you think" section (Phase 5).
 
 ---
 
-> **STOP.** Before writing the design doc and running the tiered relationship handoff (Phases 5-6, after the conversation and alternatives are done), Read `~/.claude/skills/gstack/office-hours/sections/design-and-handoff.md` and execute it
-> in full. Do not work from memory — that section is the source of truth for this step.
+> **STOP.** Before writing the design doc and handoff (Phases 5-6, after the conversation and alternatives are done), Read `design-and-handoff.md` and execute it
+> in full. Do not work from memory — that file is the source of truth for this step.
 
 ## Section self-check (before you finish)
 
-Confirm you Read every section the Section index named as applying to this run, and executed it in full. The design doc and the handoff are the deliverables — if you produced them from memory without Reading `sections/design-and-handoff.md`, stop and Read it now.
+Confirm you Read every section the Section index named as applying to this run, and executed it in full. The design doc and the handoff are the deliverables — if you produced them from memory without Reading `design-and-handoff.md`, stop and Read it now.
 
 ---
 
 ## Capture Learnings
 
 If you discovered a non-obvious pattern, pitfall, or architectural insight during
-this session, log it for future sessions:
+this session, name it to the user as a candidate for `compound-learnings`:
 
-```bash
-~/.claude/skills/gstack/bin/gstack-learnings-log '{"skill":"office-hours","type":"TYPE","key":"SHORT_KEY","insight":"DESCRIPTION","confidence":N,"source":"SOURCE","files":["path/to/relevant/file"]}'
-```
+"This session surfaced a reusable insight: {one-line description}. Worth capturing
+with `compound-learnings` so it's not re-discovered next time."
 
-**Types:** `pattern` (reusable approach), `pitfall` (what NOT to do), `preference`
-(user stated), `architecture` (structural decision), `tool` (library/framework insight),
-`operational` (project environment/CLI/workflow knowledge).
+**Only flag genuine discoveries.** Don't flag obvious things. Don't flag things the
+user already knows. A good test: would this insight save time in a future session?
+If yes, flag it.
 
-**Sources:** `observed` (you found this in the code), `user-stated` (user told you),
-`inferred` (AI deduction), `cross-model` (both Claude and Codex agree).
-
-**Confidence:** 1-10. Be honest. An observed pattern you verified in the code is 8-9.
-An inference you're not sure about is 4-5. A user preference they explicitly stated is 10.
-
-**files:** Include the specific file paths this learning references. This enables
-staleness detection: if those files are later deleted, the learning can be flagged.
-
-**Only log genuine discoveries.** Don't log obvious things. Don't log things the user
-already knows. A good test: would this insight save time in a future session? If yes, log it.
+This is a naming step, not a write — `compound-learnings` does the actual
+documentation if the user acts on the suggestion.
 
 ## Important Rules
 
