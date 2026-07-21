@@ -62,36 +62,15 @@ When evaluating architecture, think "boring by default." When reviewing tests, t
 * For particularly complex designs or behaviors, embed ASCII diagrams directly in code comments in the appropriate places: Models (data relationships, state transitions), Controllers (request flow), Concerns (mixin behavior), Services (processing pipelines), and Tests (what's being set up and why) when the test structure is non-obvious.
 * **Diagram maintenance is part of the change.** When modifying code that has ASCII diagrams in comments nearby, review whether those diagrams are still accurate. Update them as part of the same commit. Stale diagrams are worse than no diagrams — they actively mislead. Flag any stale diagrams you encounter during review even if they're outside the immediate scope of the change.
 
-## Brain Context (preflight)
+## Context Gathering
 
-Before asking any clarifying questions, load the brain's structured context
-for this project. The cache layer handles staleness, refresh, and stale-but-
-usable fallback automatically. Skip questions whose answers are already
-present in the loaded context; ground recommendations in what the brain
-already knows about the user, the product, the goals, and recent decisions.
+Before asking any clarifying questions, ground yourself in what's already known — skip questions whose answers are already on record.
 
-```bash
-eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)" 2>/dev/null || true
-{
-  printf '## Brain Context\n\n'
-  printf '\n### %s\n\n' "product"
-  ~/.claude/skills/gstack/bin/gstack-brain-cache get product --project "$SLUG" 2>/dev/null || printf '_(no product digest available yet)_\n'
-  printf '\n### %s\n\n' "recent-decisions"
-  ~/.claude/skills/gstack/bin/gstack-brain-cache get recent-decisions --project "$SLUG" 2>/dev/null || printf '_(no recent-decisions digest available yet)_\n'
-} > /tmp/.gstack-brain-context-$$.md 2>/dev/null
-[ -s /tmp/.gstack-brain-context-$$.md ] && cat /tmp/.gstack-brain-context-$$.md
-rm -f /tmp/.gstack-brain-context-$$.md 2>/dev/null || true
-```
+**Wiki context (primary source):** search `docs/solutions/` and `CONCEPTS.md` for anything relevant to this plan's area. If either doesn't exist yet, treat this as a cold project and move on — an empty wiki is a normal state, not an error.
 
-**How to use this context:**
-- If `product` digest names the value prop, target user, or stage — don't re-ask.
-- If `goals` digest lists active goals — frame recommendations against them.
-- If `recent-decisions` digest names a prior scope/architecture choice — flag if this plan contradicts.
-- If `user-profile` digest carries calibration pattern statements ("tends to over-engineer security") — surface them when relevant.
-- If a digest is `(no X digest available yet)`, treat that section as cold; ask the user.
+**Fallback context:** if the wiki is empty or the repo hasn't adopted it, fall back to `docs/superpowers/specs/`, `docs/superpowers/plans/`, and `git log --oneline -20` for relevant prior context.
 
-**Privacy:** Salience digest is filtered by allowlist (D9 default: `projects/`,
-`gstack/`, `concepts/` only). Personal/family/therapy content never leaks here.
+If any context surfaced something relevant, incorporate it into your analysis and say so: "Prior context found: [1-line summary]. Grounding this review in it."
 
 
 ---
