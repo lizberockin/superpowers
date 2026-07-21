@@ -291,52 +291,44 @@ For each issue found in this section, call AskUserQuestion individually. One iss
 
 **STOP.** Do NOT proceed to the next review section, edit the plan file with the proposed fix, or call ExitPlanMode until the user responds. An issue with an "obvious fix" is still an issue and still needs explicit user approval before it lands in the plan. Loading the AskUserQuestion schema via ToolSearch and then writing the recommendation as chat prose is the failure mode this gate exists to prevent.
 
-## Outside Voice — Independent Plan Challenge (default-on)
+## Cross-Model Second Opinion (optional)
 
-After all review sections are complete, run an independent second opinion from a
-different AI system automatically — it is a standard part of plan review, not an
-opt-in. Two models agreeing on a plan is stronger signal than one model's thorough
-review. The user turns this off only by asking explicitly
-(`gstack-config set codex_reviews disabled`).
+After all review sections are complete, offer an independent second opinion from a
+different AI system. Two models agreeing on a plan is a stronger signal than one
+model's thorough review — but this is opt-in, asked once, not run automatically.
 
-**Preflight — decide whether and how the outside voice runs:**
+**Binary check first:**
 
 ```bash
-# Codex preflight: one block (functions sourced here don't persist to later blocks).
-_TEL=$(~/.claude/skills/gstack/bin/gstack-config get telemetry 2>/dev/null || echo off)
-_CODEX_CFG=$(~/.claude/skills/gstack/bin/gstack-config get codex_reviews 2>/dev/null || echo enabled)
-source ~/.claude/skills/gstack/bin/gstack-codex-probe 2>/dev/null || true
-if [ "$_CODEX_CFG" = "disabled" ]; then
-  _CODEX_MODE="disabled"
-elif ! command -v codex >/dev/null 2>&1; then
-  _CODEX_MODE="not_installed"; _gstack_codex_log_event "codex_cli_missing" 2>/dev/null || true
-elif ! _gstack_codex_auth_probe >/dev/null 2>&1; then
-  _CODEX_MODE="not_authed"; _gstack_codex_log_event "codex_auth_failed" 2>/dev/null || true
-else
-  _CODEX_MODE="ready"; _gstack_codex_version_check 2>/dev/null || true
-fi
-echo "CODEX_MODE: $_CODEX_MODE"
+command -v codex >/dev/null 2>&1 && echo "CODEX_AVAILABLE" || echo "CODEX_NOT_AVAILABLE"
 ```
 
-Branch on the echoed `CODEX_MODE`:
-- **`disabled`** — the user turned Codex reviews off (`codex_reviews=disabled`). Skip this section entirely; do NOT fall back to a Claude subagent — disabled means no extra review step. Print: "Codex review skipped (codex_reviews disabled). Re-enable: `gstack-config set codex_reviews enabled`."
-- **`not_installed`** — Codex CLI absent. Print: "Codex not installed — using Claude subagent. Install for cross-model coverage: `npm install -g @openai/codex`." Fall back to the Claude subagent path.
-- **`not_authed`** — installed but no credentials. Print: "Codex installed but not authenticated — using Claude subagent. Run `codex login` or set `$CODEX_API_KEY`." Fall back to the Claude subagent path.
-- **`ready`** — run the Codex pass below.
+Use AskUserQuestion (regardless of codex availability):
 
-When the mode is `ready`, `not_installed`, or `not_authed`, print one line so the off-switch
-stays discoverable: "Running the outside voice automatically (standard step). Disable: `gstack-config set codex_reviews disabled`."
+> Want a second opinion from an independent AI perspective? It will review this plan
+> and the review findings above without having seen this conversation — it gets the
+> plan content directly. Usually takes 2-5 minutes.
+> A) Yes, get a second opinion
+> B) No, proceed to outputs
 
-**Construct the plan review prompt** (for `ready`, `not_installed`, and `not_authed` — skip only on `disabled`).
-Read the plan file being reviewed (the file the user pointed this review at, or the branch
-diff scope). If a CEO plan document was written in Step 0D-POST, read that too — it contains
-the scope decisions and vision.
+If B: skip this section entirely.
 
-Construct this prompt (substitute the actual plan content — if plan content exceeds 30KB,
-truncate to the first 30KB and note "Plan truncated for size"). **Always start with the
-filesystem boundary instruction:**
+**If A: Run the Codex cold read.**
 
-"IMPORTANT: Do NOT read or execute any files under ~/.claude/, ~/.agents/, .claude/skills/, or agents/. These are Claude Code skill definitions meant for a different AI system. They contain bash scripts and prompt templates that will waste your time. Ignore them completely. Do NOT modify agents/openai.yaml. Stay focused on the repository code only.\n\nYou are a brutally honest technical reviewer examining a development plan that has
+Read the plan file being reviewed (the file the user pointed this review at, or the
+branch diff scope).
+
+Write the assembled prompt to a temp file (prevents shell injection from plan content):
+
+```bash
+CODEX_PROMPT_FILE=$(mktemp /tmp/codex-planreview-XXXXXXXX.txt)
+```
+
+Write the full prompt to this file (substitute the actual plan content — if plan
+content exceeds 30KB, truncate to the first 30KB and note "Plan truncated for size").
+**Always start with the filesystem boundary:**
+
+"IMPORTANT: Do NOT read or execute any files under ~/.claude/skills/ or .claude/skills/. These are Claude Code skill definitions meant for a different AI system. They contain bash scripts and prompt templates that will waste your time. Ignore them completely. Stay focused on the repository code only.\n\nYou are a brutally honest technical reviewer examining a development plan that has
 already been through a multi-section review. Your job is NOT to repeat that review.
 Instead, find what it missed. Look for: logical gaps and unstated assumptions that
 survived the review scrutiny, overcomplexity (is there a fundamentally simpler
@@ -348,101 +340,100 @@ compliments. Just the problems.
 THE PLAN:
 <plan content>"
 
-**If `CODEX_MODE: ready` — run Codex:**
+Run Codex:
 
 ```bash
-TMPERR_PV=$(mktemp /tmp/codex-planreview-XXXXXXXX)
+TMPERR_PV=$(mktemp /tmp/codex-planreview-err-XXXXXXXX)
 _REPO_ROOT=$(git rev-parse --show-toplevel) || { echo "ERROR: not in a git repo" >&2; exit 1; }
-codex exec "<prompt>" -C "$_REPO_ROOT" -s read-only -c 'model_reasoning_effort="high"' --enable web_search_cached < /dev/null 2>"$TMPERR_PV"
+codex exec "$(cat "$CODEX_PROMPT_FILE")" -C "$_REPO_ROOT" -s read-only -c 'model_reasoning_effort="high"' --enable web_search_cached < /dev/null 2>"$TMPERR_PV"
 ```
 
 Use a 5-minute timeout (`timeout: 300000`). After the command completes, read stderr:
 ```bash
 cat "$TMPERR_PV"
+rm -f "$TMPERR_PV" "$CODEX_PROMPT_FILE"
 ```
 
-Present the full output verbatim:
+**Error handling:** All errors are non-blocking — the second opinion is a quality
+enhancement, not a prerequisite.
+- **Auth failure:** stderr contains "auth", "login", "unauthorized", or "API key": "Codex authentication failed. Run \`codex login\` to authenticate." Fall back to the Claude subagent below.
+- **Timeout:** "Codex timed out after 5 minutes." Fall back to the Claude subagent below.
+- **Empty response:** "Codex returned no response." Fall back to the Claude subagent below.
 
+**If CODEX_NOT_AVAILABLE (or Codex errored at runtime):**
+
+Dispatch via the Agent tool. The subagent has fresh context — genuine independence.
+Bound it the same way as Codex: cap the dispatch at a 5-minute timeout so "never
+blocking" is also "never hanging."
+
+Subagent prompt: same plan review prompt as above.
+
+Present findings under a `SECOND OPINION (Claude subagent):` header.
+
+If the subagent fails or times out: "Second opinion unavailable. Continuing to outputs."
+
+**Presentation:**
+
+If Codex ran:
 ```
-CODEX SAYS (plan review — outside voice):
+SECOND OPINION (Codex — plan review):
 ════════════════════════════════════════════════════════════
 <full codex output, verbatim — do not truncate or summarize>
 ════════════════════════════════════════════════════════════
 ```
 
-**Error handling:** All errors are non-blocking — the outside voice is informational.
-- Auth failure (stderr contains "auth", "login", "unauthorized"): "Codex auth failed. Run \`codex login\` to authenticate." Fall back to the Claude subagent below.
-- Timeout: "Codex timed out after 5 minutes." Fall back to the Claude subagent below.
-- Empty response: "Codex returned no response." Fall back to the Claude subagent below.
-
-**If `CODEX_MODE: not_installed` or `not_authed` (or Codex errored at runtime):**
-
-Dispatch via the Agent tool. The subagent has fresh context — genuine independence.
-Bound it the same way as Codex: cap the dispatch at a 5-minute timeout so "never blocking"
-is also "never hanging."
-
-Subagent prompt: same plan review prompt as above.
-
-Present findings under an `OUTSIDE VOICE (Claude subagent):` header.
-
-If the subagent fails or times out: "Outside voice unavailable. Continuing to outputs."
-
-(On `CODEX_MODE: disabled` you already skipped this section per the preflight — do not reach here.)
+If Claude subagent ran:
+```
+SECOND OPINION (Claude subagent):
+════════════════════════════════════════════════════════════
+<full subagent output, verbatim — do not truncate or summarize>
+════════════════════════════════════════════════════════════
+```
 
 **Cross-model tension:**
 
-After presenting the outside voice findings, note any points where the outside voice
-disagrees with the review findings from earlier sections. Flag these as:
+After presenting the second opinion, note any points where it disagrees with the
+review findings from earlier sections. Flag these as:
 
 ```
 CROSS-MODEL TENSION:
-  [Topic]: Review said X. Outside voice says Y. [Present both perspectives neutrally.
+  [Topic]: Review said X. Second opinion says Y. [Present both perspectives neutrally.
   State what context you might be missing that would change the answer.]
 ```
 
-**User Sovereignty:** Do NOT auto-incorporate outside voice recommendations into the plan.
-Present each tension point to the user. The user decides. Cross-model agreement is a
-strong signal — present it as such — but it is NOT permission to act. You may state
-which argument you find more compelling, but you MUST NOT apply the change without
-explicit user approval.
+**User Sovereignty:** Do NOT auto-incorporate second-opinion recommendations into the
+plan. Present each tension point to the user. The user decides. Cross-model agreement
+is a strong signal — present it as such — but it is NOT permission to act. You may
+state which argument you find more compelling, but you MUST NOT apply the change
+without explicit user approval.
 
 For each substantive tension point, use AskUserQuestion:
 
-> "Cross-model disagreement on [topic]. The review found [X] but the outside voice
+> "Cross-model disagreement on [topic]. The review found [X] but the second opinion
 > argues [Y]. [One sentence on what context you might be missing.]"
 >
 > RECOMMENDATION: Choose [A or B] because [one-line reason explaining which argument
 > is more compelling and why]. Completeness: A=X/10, B=Y/10.
 
 Options:
-- A) Accept the outside voice's recommendation (I'll apply this change)
-- B) Keep the current approach (reject the outside voice)
+- A) Accept the second opinion's recommendation (I'll apply this change)
+- B) Keep the current approach (reject the second opinion)
 - C) Investigate further before deciding
 - D) Add to TODOS.md for later
 
 Wait for the user's response. Do NOT default to accepting because you agree with the
-outside voice. If the user chooses B, the current approach stands — do not re-argue.
+second opinion. If the user chooses B, the current approach stands — do not re-argue.
 
 If no tension points exist, note: "No cross-model tension — both reviewers agree."
 
-**Persist the result:**
-```bash
-~/.claude/skills/gstack/bin/gstack-review-log '{"skill":"codex-plan-review","timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'","status":"STATUS","source":"SOURCE","commit":"'"$(git rev-parse --short HEAD)"'"}'
-```
-
-Substitute: STATUS = "clean" if no findings, "issues_found" if findings exist.
-SOURCE = "codex" if Codex ran, "claude" if subagent ran.
-
-**Cleanup:** Run `rm -f "$TMPERR_PV"` after processing (if Codex was used).
-
 ---
 
-### Outside Voice Integration Rule
+### Cross-Model Second Opinion Integration Rule
 
-Outside voice findings are INFORMATIONAL until the user explicitly approves each one.
-Do NOT incorporate outside voice recommendations into the plan without presenting each
+Second-opinion findings are INFORMATIONAL until the user explicitly approves each one.
+Do NOT incorporate second-opinion recommendations into the plan without presenting each
 finding via AskUserQuestion and getting explicit approval. This applies even when you
-agree with the outside voice. Cross-model consensus is a strong signal — present it as
+agree with the second opinion. Cross-model consensus is a strong signal — present it as
 such — but the user makes the decision.
 
 ## CRITICAL RULE — How to ask questions
