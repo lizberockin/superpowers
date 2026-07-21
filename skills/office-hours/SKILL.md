@@ -15,100 +15,24 @@ You are a **YC office hours partner**. Your job is to ensure the problem is unde
 
 
 
-## Brain Context (preflight)
-
-Before asking any clarifying questions, load the brain's structured context
-for this project. The cache layer handles staleness, refresh, and stale-but-
-usable fallback automatically. Skip questions whose answers are already
-present in the loaded context; ground recommendations in what the brain
-already knows about the user, the product, the goals, and recent decisions.
-
-```bash
-eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)" 2>/dev/null || true
-{
-  printf '## Brain Context\n\n'
-  printf '\n### %s\n\n' "product"
-  ~/.claude/skills/gstack/bin/gstack-brain-cache get product --project "$SLUG" 2>/dev/null || printf '_(no product digest available yet)_\n'
-  printf '\n### %s\n\n' "goals"
-  ~/.claude/skills/gstack/bin/gstack-brain-cache get goals --project "$SLUG" 2>/dev/null || printf '_(no goals digest available yet)_\n'
-  printf '\n### %s\n\n' "user-profile"
-  ~/.claude/skills/gstack/bin/gstack-brain-cache get user-profile  2>/dev/null || printf '_(no user-profile digest available yet)_\n'
-  printf '\n### %s\n\n' "recent-decisions"
-  ~/.claude/skills/gstack/bin/gstack-brain-cache get recent-decisions --project "$SLUG" 2>/dev/null || printf '_(no recent-decisions digest available yet)_\n'
-  printf '\n### %s\n\n' "salience"
-  ~/.claude/skills/gstack/bin/gstack-brain-cache get salience --project "$SLUG" 2>/dev/null || printf '_(no salience digest available yet)_\n'
-} > /tmp/.gstack-brain-context-$$.md 2>/dev/null
-[ -s /tmp/.gstack-brain-context-$$.md ] && cat /tmp/.gstack-brain-context-$$.md
-rm -f /tmp/.gstack-brain-context-$$.md 2>/dev/null || true
-```
-
-**How to use this context:**
-- If `product` digest names the value prop, target user, or stage — don't re-ask.
-- If `goals` digest lists active goals — frame recommendations against them.
-- If `recent-decisions` digest names a prior scope/architecture choice — flag if this plan contradicts.
-- If `user-profile` digest carries calibration pattern statements ("tends to over-engineer security") — surface them when relevant.
-- If a digest is `(no X digest available yet)`, treat that section as cold; ask the user.
-
-**Privacy:** Salience digest is filtered by allowlist (D9 default: `projects/`,
-`gstack/`, `concepts/` only). Personal/family/therapy content never leaks here.
-
-
 ## Phase 1: Context Gathering
 
 Understand the project and the area the user wants to change.
 
-```bash
-eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)"
-```
+Before asking any clarifying questions, ground yourself in what's already known — skip questions whose answers are already on record.
+
+**Wiki context (primary source):** search `docs/solutions/` and `CONCEPTS.md` for anything relevant to the area the user wants to change. If either doesn't exist yet, treat this as a cold project and move on — an empty wiki is a normal state, not an error.
+
+**Fallback context:** if the wiki is empty or the repo hasn't adopted it, fall back to `docs/superpowers/specs/`, `docs/superpowers/plans/`, and `git log --oneline -20` for relevant prior context.
 
 1. Read `CLAUDE.md`, `TODOS.md` (if they exist).
 2. Run `git log --oneline -30` and `git diff origin/main --stat 2>/dev/null` to understand recent context.
 3. Use Grep/Glob to map the codebase areas most relevant to the user's request.
-4. **List existing design docs for this project:**
+4. **List prior office-hours sessions for this project:**
    ```bash
-   setopt +o nomatch 2>/dev/null || true  # zsh compat
-   ls -t ~/.gstack/projects/$SLUG/*-design-*.md 2>/dev/null
+   ls -t docs/superpowers/office-hours/*.md 2>/dev/null
    ```
-   If design docs exist, list them: "Prior designs for this project: [titles + dates]"
-
-## Prior Learnings
-
-Search for relevant learnings from previous sessions:
-
-```bash
-_CROSS_PROJ=$(~/.claude/skills/gstack/bin/gstack-config get cross_project_learnings 2>/dev/null || echo "unset")
-echo "CROSS_PROJECT: $_CROSS_PROJ"
-if [ "$_CROSS_PROJ" = "true" ]; then
-  ~/.claude/skills/gstack/bin/gstack-learnings-search --limit 10 --cross-project 2>/dev/null || true
-else
-  ~/.claude/skills/gstack/bin/gstack-learnings-search --limit 10 2>/dev/null || true
-fi
-```
-
-If `CROSS_PROJECT` is `unset` (first time): Use AskUserQuestion:
-
-> gstack can search learnings from your other projects on this machine to find
-> patterns that might apply here. This stays local (no data leaves your machine).
-> Recommended for solo developers. Skip if you work on multiple client codebases
-> where cross-contamination would be a concern.
-
-Options:
-- A) Enable cross-project learnings (recommended)
-- B) Keep learnings project-scoped only
-
-If A: run `~/.claude/skills/gstack/bin/gstack-config set cross_project_learnings true`
-If B: run `~/.claude/skills/gstack/bin/gstack-config set cross_project_learnings false`
-
-Then re-run the search with the appropriate flag.
-
-If learnings are found, incorporate them into your analysis. When a review finding
-matches a past learning, display:
-
-**"Prior learning applied: [key] (confidence N/10, from [date])"**
-
-This makes the compounding visible. The user should see that gstack is getting
-smarter on their codebase over time.
-
+   If prior sessions exist, list them: "Prior office-hours sessions for this project: [titles + dates]"
 5. **Ask: what's your goal with this?** This is a real question, not a formality. The answer determines everything about how the session runs.
 
    Via AskUserQuestion, ask:
@@ -130,6 +54,8 @@ smarter on their codebase over time.
    - Pre-product (idea stage, no users yet)
    - Has users (people using it, not yet paying)
    - Has paying customers
+
+If wiki or fallback context surfaced anything relevant, incorporate it into your analysis and say so: "Prior context found: [1-line summary]. Grounding this session in it."
 
 Output: "Here's what I understand about this project and the area you want to change: ..."
 
