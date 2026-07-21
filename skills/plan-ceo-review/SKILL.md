@@ -202,7 +202,7 @@ Report findings before proceeding to Step 0.
 
 ### Landscape Check
 
-Read ETHOS.md for the Search Before Building framework (the preamble's Search Before Building section has the path). Before challenging scope, understand the landscape. WebSearch for:
+Before challenging scope, understand the landscape. This is not competitive research — it's understanding conventional wisdom well enough to evaluate where it's wrong. WebSearch for:
 - "[product category] landscape {current year}"
 - "[key feature] alternatives"
 - "why [incumbent/conventional approach] [succeeds/fails]"
@@ -210,11 +210,11 @@ Read ETHOS.md for the Search Before Building framework (the preamble's Search Be
 If WebSearch is unavailable, skip this check and note: "Search unavailable — proceeding with in-distribution knowledge only."
 
 Run the three-layer synthesis:
-- **[Layer 1]** What's the tried-and-true approach in this space?
-- **[Layer 2]** What are the search results saying?
-- **[Layer 3]** First-principles reasoning — where might the conventional wisdom be wrong?
+- **[Layer 1]** What's the tried-and-true approach in this space? Don't reinvent it without reason.
+- **[Layer 2]** What are the search results saying is new and popular? Scrutinize it.
+- **[Layer 3]** First-principles reasoning — where might the conventional wisdom be wrong? Prize this above the other two layers.
 
-Feed into the Premise Challenge (0A) and Dream State Mapping (0C). If you find a eureka moment, surface it during the Expansion opt-in ceremony as a differentiation opportunity. Log it (see preamble).
+Feed into the Premise Challenge (0A) and Dream State Mapping (0C). If Layer 3 reasoning reveals a genuine insight, name it: "EUREKA: Everyone does X because they assume [assumption]. But [evidence] suggests that's wrong here. This means [implication]." Surface it during the Expansion opt-in ceremony as a differentiation opportunity, and treat it as a candidate for `compound-learnings` at session end (see Capture Learnings).
 
 ## Context Gathering
 
