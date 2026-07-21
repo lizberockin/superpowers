@@ -61,8 +61,6 @@ Output: "Here's what I understand about this project and the area you want to ch
 
 ---
 
-
----
 ## Section index — Read each section when its situation applies
 
 This skill is a decision-tree skeleton. The steps below point to on-demand
@@ -71,6 +69,7 @@ sections. Read a section in full before doing its step; do not work from memory.
 | When | Read this section |
 |------|-------------------|
 | writing the design doc and handoff (Phases 5-6, after the conversation and alternatives are done) | `design-and-handoff.md` |
+
 ---
 
 ## Phase 2A: Startup Mode — YC Product Diagnostic
@@ -302,9 +301,7 @@ If no matches found, proceed silently.
 
 ## Phase 2.75: Landscape Awareness
 
-Read ETHOS.md for the full Search Before Building framework (three layers, eureka moments). The preamble's Search Before Building section has the ETHOS.md path.
-
-After understanding the problem through questioning, search for what the world thinks. This is NOT competitive research (that's /design-consultation's job). This is understanding conventional wisdom so you can evaluate where it's wrong.
+After understanding the problem through questioning, search for what the world thinks. This is NOT competitive research. This is understanding conventional wisdom so you can evaluate where it's wrong.
 
 **Privacy gate:** Before searching, use AskUserQuestion: "I'd like to search for what the world thinks about this space to inform our discussion. This sends generalized category terms (not your specific idea) to a search provider. OK to proceed?"
 Options: A) Yes, search away  B) Skip — keep this session private
@@ -493,7 +490,7 @@ Rules:
 
 **RECOMMENDATION:** Choose [X] because [one-line reason mapped to the founder's stated goal].
 
-Emit ONE AskUserQuestion that lists every alternative (A/B and optionally C) as numbered options, using the preamble's AskUserQuestion Format section. The AskUserQuestion call is a tool_use, not prose — write the question text and call the tool.
+Emit ONE AskUserQuestion that lists every alternative (A/B and optionally C) as numbered options. The AskUserQuestion call is a tool_use, not prose — write the question text and call the tool.
 
 **STOP.** Do NOT proceed to Phase 4.5 (Founder Signal Synthesis), Phase 5 (Design Doc), Phase 6 (Closing), or any design-doc generation until the user responds. A "clearly winning approach" is still an approach decision and still needs explicit user approval before it lands in the design doc. Writing the recommendation in chat prose and continuing forward is the failure mode this gate exists to prevent.
 
