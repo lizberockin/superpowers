@@ -1,37 +1,9 @@
 ---
 name: plan-eng-review
-preamble-tier: 3
-interactive: true
-version: 1.0.0
-description: Eng manager-mode plan review. (gstack)
-benefits-from: [office-hours]
-allowed-tools:
-  - Read
-  - Write
-  - Grep
-  - Glob
-  - AskUserQuestion
-  - Bash
-  - WebSearch
-triggers:
-  - review architecture
-  - eng plan review
-  - check the implementation plan
+description: Use when reviewing a plan to lock in the execution details — "review the architecture", "engineering review", "lock in the plan", "tech review", or "technical review". Walks through architecture, data flow, diagrams, edge cases, test coverage, and performance issues interactively with opinionated recommendations. Proactively suggest when the user has a plan or design doc and is about to start coding, to catch architecture issues before implementation.
 ---
-<!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
-<!-- Regenerate: bun run gen:skill-docs -->
 
-
-## When to invoke this skill
-
-Lock in the execution plan — architecture,
-data flow, diagrams, edge cases, test coverage, performance. Walks through
-issues interactively with opinionated recommendations. Use when asked to
-"review the architecture", "engineering review", or "lock in the plan".
-Proactively suggest when the user has a plan or design doc and is about to
-start coding — to catch architecture issues before implementation.
-
-Voice triggers (speech-to-text aliases): "tech review", "technical review", "plan engineering review".
+**See also:** `superpowers:office-hours` — produces the design doc this review reads for problem statement, constraints, and chosen approach; this skill offers to run it if none exists yet. **Companion review:** `plan-ceo-review` is a strategic scope/ambition review — running it before eng review is a suggestion, not required.
 
 ## Preamble (run first)
 
