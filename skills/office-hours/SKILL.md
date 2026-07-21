@@ -499,83 +499,6 @@ Emit ONE AskUserQuestion that lists every alternative (A/B and optionally C) as 
 
 ---
 
-## Visual Design Exploration
-
-```bash
-_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-D=""
-[ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/design/dist/design" ] && D="$_ROOT/.claude/skills/gstack/design/dist/design"
-[ -z "$D" ] && D="$HOME/.claude/skills/gstack/design/dist/design"
-[ -x "$D" ] && echo "DESIGN_READY" || echo "DESIGN_NOT_AVAILABLE"
-```
-
-**If `DESIGN_NOT_AVAILABLE`:** Fall back to the HTML wireframe approach below
-(the existing DESIGN_SKETCH section). Visual mockups require the design binary.
-
-**If `DESIGN_READY`:** Generate visual mockup explorations for the user.
-
-Generating visual mockups of the proposed design... (say "skip" if you don't need visuals)
-
-**Step 1: Set up the design directory**
-
-```bash
-eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)"
-_DESIGN_DIR="$HOME/.gstack/projects/$SLUG/designs/mockup-$(date +%Y%m%d)"
-mkdir -p "$_DESIGN_DIR"
-echo "DESIGN_DIR: $_DESIGN_DIR"
-```
-
-**Step 2: Construct the design brief**
-
-Read DESIGN.md if it exists — use it to constrain the visual style. If no DESIGN.md,
-explore wide across diverse directions.
-
-**Step 3: Generate 3 variants**
-
-```bash
-$D variants --brief "<assembled brief>" --count 3 --output-dir "$_DESIGN_DIR/"
-```
-
-This generates 3 style variations of the same brief (~40 seconds total).
-
-**Step 4: Show variants inline, then open comparison board**
-
-Show each variant to the user inline first (read the PNGs with Read tool), then
-create and serve the comparison board:
-
-```bash
-$D compare --images "$_DESIGN_DIR/variant-A.png,$_DESIGN_DIR/variant-B.png,$_DESIGN_DIR/variant-C.png" --output "$_DESIGN_DIR/design-board.html" --serve
-```
-
-This opens the board in the user's default browser and blocks until feedback is
-received. Read stdout for the structured JSON result. No polling needed.
-
-If `$D serve` is not available or fails, fall back to AskUserQuestion:
-"I've opened the design board. Which variant do you prefer? Any feedback?"
-
-**Step 5: Handle feedback**
-
-If the JSON contains `"regenerated": true`:
-1. Read `regenerateAction` (or `remixSpec` for remix requests)
-2. Generate new variants with `$D iterate` or `$D variants` using updated brief
-3. Create new board with `$D compare`
-4. POST the new HTML to the running board. Parse the board URL from stderr
-   (`BOARD_URL: http://127.0.0.1:N/boards/<id>/` — the daemon path) or fall
-   back to the legacy port (`SERVE_STARTED: port=N` — only emitted under
-   `--no-daemon`, hits `/api/reload` root). Daemon path:
-   `curl -X POST "${BOARD_URL}api/reload" -H 'Content-Type: application/json' -d '{"html":"$_DESIGN_DIR/design-board.html"}'`
-5. Board auto-refreshes in the same tab
-
-If `"regenerated": false`: proceed with the approved variant.
-
-**Step 6: Save approved choice**
-
-```bash
-echo '{"approved_variant":"<VARIANT>","feedback":"<FEEDBACK>","date":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","screen":"mockup","branch":"'$(git branch --show-current 2>/dev/null)'"}' > "$_DESIGN_DIR/approved.json"
-```
-
-Reference the saved mockup in the design doc or plan.
-
 ## Visual Sketch (UI ideas only)
 
 If the chosen approach involves user-facing UI (screens, pages, forms, dashboards,
@@ -597,42 +520,52 @@ section silently.
 
 **Step 2: Generate wireframe HTML**
 
-Generate a single-page HTML file with these constraints:
-- **Intentionally rough aesthetic** — use system fonts, thin gray borders, no color,
-  hand-drawn-style elements. This is a sketch, not a polished mockup.
-- Self-contained — no external dependencies, no CDN links, inline CSS only
+Generate the wireframe as an HTML **content fragment** (not a full document — see
+`skills/brainstorming/visual-companion.md`'s "Writing Content Fragments") with these
+constraints:
+- **Intentionally rough aesthetic** — use the companion's `.mock-nav`, `.mock-sidebar`,
+  `.mock-content`, `.mock-button`, `.mock-input`, `.placeholder` classes (documented
+  in the companion guide) rather than a polished custom design. This is a sketch.
 - Show the core interaction flow (1-3 screens/states max)
 - Include realistic placeholder content (not "Lorem ipsum" — use content that
   matches the actual use case)
-- Add HTML comments explaining design decisions
 
-Write to a temp file:
-```bash
-SKETCH_FILE="/tmp/gstack-sketch-$(date +%s).html"
-```
+**Step 3: Show it via the Visual Companion**
 
-**Step 3: Render and capture**
+This wireframe is exactly the kind of content the Visual Companion exists for.
+Offer it the same way `brainstorming` does — just-in-time, its own message, not
+upfront (skip the offer if the user already accepted the companion earlier in
+this session):
 
-```bash
-$B goto "file://$SKETCH_FILE"
-$B screenshot /tmp/gstack-sketch.png
-```
+> "This next part might be easier if I show you — I can put the wireframe in a
+> browser tab so you can see it directly. Want me to? I'll open it for you."
 
-If `$B` is not available (browse binary not set up), skip the render step. Tell the
-user: "Visual sketch requires the browse binary. Run the setup script to enable it."
+If declined, describe the wireframe in prose instead (layout, hierarchy, key
+states) and skip to Step 5.
+
+If accepted, follow `skills/brainstorming/visual-companion.md`:
+1. Start the companion server if it isn't already running this session:
+   `scripts/start-server.sh --project-dir <repo root> --open` (script lives
+   under `skills/brainstorming/`).
+2. Write the Step 2 wireframe fragment to a new file in the returned
+   `screen_dir`, e.g. `wireframe.html`.
+3. Tell the user the URL and a one-line summary of what's on screen, then end
+   your turn.
 
 **Step 4: Present and iterate**
 
-Show the screenshot to the user. Ask: "Does this feel right? Want to iterate on the layout?"
+On your next turn, read `$STATE_DIR/events` (if present) alongside the user's
+terminal reply. Ask: "Does this feel right? Want to iterate on the layout?"
 
-If they want changes, regenerate the HTML with their feedback and re-render.
-If they approve or say "good enough," proceed.
+If they want changes, write a new versioned file (`wireframe-v2.html`, etc.) —
+never overwrite an existing screen. If they approve or say "good enough," push
+a brief waiting screen (per the companion guide's "Unload when returning to
+terminal") and proceed.
 
 **Step 5: Include in design doc**
 
-Reference the wireframe screenshot in the design doc's "Recommended Approach" section.
-The screenshot file at `/tmp/gstack-sketch.png` can be referenced by downstream skills
-(`/plan-design-review`, `/design-review`) to see what was originally envisioned.
+Reference the wireframe in the design doc's "Recommended Approach" section so
+downstream review work can see what was originally envisioned.
 
 **Step 6: Outside design voices** (optional)
 
