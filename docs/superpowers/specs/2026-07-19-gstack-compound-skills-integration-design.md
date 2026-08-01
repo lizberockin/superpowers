@@ -119,11 +119,22 @@ Reordered from the original draft: `compound-learnings` now lands first because 
 3. Cross-link `ideate` ↔ `brainstorming` and `compound-learnings` ↔ `writing-skills`, including the graduation path from the wiki-consultation table above ("a `docs/solutions/` entry that keeps recurring across projects is a signal it should become a skill instead").
 4. Pressure-test both via `writing-skills`' subagent methodology before merging.
 
-**Phase 2 — office-hours, plan-ceo-review, plan-eng-review**
-1. Copy `sections/*.md` (not `.tmpl`) into each skill directory — flat next to `SKILL.md` if 1-2 files, a `references/` subfolder if more, matching whichever pattern the receiving skill's file count warrants (superpowers doesn't use `references/` uniformly — e.g. `writing-skills/` nests `examples/` but most skills keep supporting files flat).
-2. Rewrite each `SKILL.md`: strip frontmatter to `name`/`description`; delete the "Preamble (run first)" block; replace `gbrain` context-gathering with the two-tier wiki-then-specs/git-log step (Decision 4); replace the passive section-manifest's gstack `$schema` and re-point `sections/*.md` references to the new paths; collapse `SESSION_KIND` branches to interactive-only (Decision 8); rewrite the description field to "Use when..." form per `writing-skills`.
-3. Add a short "See also" line in each: `office-hours` → mentions `brainstorming`/`writing-plans` as next steps; `plan-ceo-review` and `plan-eng-review` → mention `office-hours` as a useful predecessor (carrying forward `benefits-from` as prose) and each other as companion reviews.
-4. Run each rewritten skill through the `writing-skills` TDD loop (pressure-test with a subagent, since none of these three have ever been tested against superpowers' own bar) before merging.
+**Phase 2 — split into 2a and 2b.** Each skill's core content alone (after stripping gstack's shared runtime boilerplate) turned out to be comparable in size to all of Phase 1 combined, and office-hours has no prerequisite skill of its own — it's the entry point of the `office-hours → brainstorming → writing-plans` chain — so it can be ported and pressure-tested independently of the two review skills, which share a distinct pattern (the "Prerequisite Skill Offer": actively reading and inline-executing office-hours's SKILL.md, skipping a named list of shared sections) that doesn't apply to office-hours at all.
+
+**Phase 2a — office-hours.** Fully specified in [`2026-07-20-office-hours-port-design.md`](2026-07-20-office-hours-port-design.md), including several calls that surfaced only after reading the actual source file (a 315-line cross-session relationship-tiering system to drop, an AI-image-generation mockup pipeline to drop in favor of reusing `brainstorming`'s Visual Companion, and a hand-off style decision: prose mention only, no active `Skill`-tool invocation into `brainstorming`).
+
+**Phase 2b — plan-ceo-review, plan-eng-review.** Fully specified in
+[`2026-07-20-plan-ceo-eng-review-port-design.md`](2026-07-20-plan-ceo-eng-review-port-design.md).
+Both skills ported together (they share the large majority of their
+translation decisions). Notable calls: the "Prerequisite Skill Offer"
+pattern resolves to active `Skill`-tool invocation of `office-hours` (a
+pre-work gate, not a completion handoff, so it doesn't conflict with Phase
+2a's prose-only handoff precedent); a new repo-root `TODOS.md` convention
+and a new `docs/superpowers/ceo-plans/` directory are introduced; the
+source's 8-skill Review Readiness Dashboard is dropped in favor of a
+self-contained check against the plan file's own review-report headings,
+since 6 of its 8 data sources (`/autoplan`, `/plan-design-review`,
+`/adversarial-review`, `/codex-review`) aren't being ported.
 
 **Phase 3 — wiki consultation retrofits + integration polish**
 1. Apply the wiki-consultation edits from the table above to `systematic-debugging`, `writing-plans`, `brainstorming`, `finishing-a-development-branch`, `requesting-code-review`, `receiving-code-review`, and `writing-skills`. Each is a small, additive step/paragraph — not a rewrite of the skill's core methodology — but these are already-tuned, frequently-triggered skills. Pressure-test each edit per `writing-skills` (baseline vs. with-the-addition, per its RED/GREEN methodology) before merging rather than assuming an additive line is automatically safe.
