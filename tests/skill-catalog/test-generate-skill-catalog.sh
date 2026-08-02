@@ -40,8 +40,8 @@ EOF
     printf '%s\n' "$file"
 }
 
-test_extraction_produces_17_skills_alphabetical() {
-    local desc="extraction produces 17 skills, alphabetically sorted"
+test_extraction_produces_18_skills_alphabetical() {
+    local desc="extraction produces 18 skills, alphabetically sorted"
     local target
     target="$(make_target_file "extraction.md")"
 
@@ -52,10 +52,10 @@ test_extraction_produces_17_skills_alphabetical() {
 
     local count
     count="$(printf '%s\n' "$block" | grep -c '^- \*\*')"
-    if [ "$count" -eq 17 ]; then
-        pass "$desc (17 bullets)"
+    if [ "$count" -eq 18 ]; then
+        pass "$desc (18 bullets)"
     else
-        fail "$desc (expected 17 bullets, got $count)"
+        fail "$desc (expected 18 bullets, got $count)"
         printf '%s\n' "$block" | sed 's/^/      /'
     fi
 
@@ -181,7 +181,7 @@ test_check_mode_passes_against_real_readme() {
 }
 
 echo "Running generate-skill-catalog.sh tests..."
-test_extraction_produces_17_skills_alphabetical
+test_extraction_produces_18_skills_alphabetical
 test_brainstorming_quotes_stripped
 test_check_mode_exits_0_when_in_sync
 test_check_mode_exits_1_when_stale
