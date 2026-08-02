@@ -67,6 +67,7 @@ Hitting a wall? See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for known failure m
 <!-- BEGIN GENERATED SKILL CATALOG -->
 - **brainstorming** — You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.
 - **compound-learnings** — Use when a problem was just solved, a durable project convention was established, or project-specific vocabulary emerged — captures it as searchable documentation in docs/solutions/ or CONCEPTS.md before the context is lost.
+- **compound-memory** — Use when the user signals the session is wrapping up — checks whether anything worth remembering was never saved to Claude Code's Auto Memory.
 - **dispatching-parallel-agents** — Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies
 - **executing-plans** — Use when you have a written implementation plan to execute in a separate session with review checkpoints
 - **finishing-a-development-branch** — Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup

@@ -35,6 +35,7 @@ When multiple skills apply, process skills come first — they set the approach,
 <!-- BEGIN GENERATED ROUTING TABLE -->
 - You MUST use this before any creative work → superpowers:brainstorming
 - Use when a problem was just solved, a durable project convention was established, or project-specific vocabulary emerged → superpowers:compound-learnings
+- Use when the user signals the session is wrapping up → superpowers:compound-memory
 - Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies → superpowers:dispatching-parallel-agents
 - Use when you have a written implementation plan to execute in a separate session with review checkpoints → superpowers:executing-plans
 - Use when implementation is complete, all tests pass, and you need to decide how to integrate the work → superpowers:finishing-a-development-branch
