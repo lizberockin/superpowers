@@ -1,9 +1,11 @@
 ---
 name: compound-memory
-description: Use at natural session wind-down moments (the user signals they're done, wrapping up, or heading out) to check whether anything from the session should be saved to Claude Code's Auto Memory before it's lost.
+description: Use when the user signals the session is wrapping up — checks whether anything worth remembering was never saved to Claude Code's Auto Memory.
 ---
 
 # Compound Memory
+
+**See also:** `superpowers:compound-learnings` — captures team-shared docs/solutions in `docs/solutions/` or `CONCEPTS.md`, not personal Auto Memory entries; `consolidate-memory` — a hygiene pass over memory entries that already exist, rather than catching new ones that were missed. Use this skill to catch missed captures at session wind-down; use the others for their respective jobs.
 
 ## Overview
 
@@ -30,7 +32,7 @@ Ask for compound-memory by name to check for anything to remember, without waiti
 ## Process
 
 1. **Scan.** Review the session against the four memory types already defined in the Auto Memory system instructions — user, feedback, project, reference — using their existing "when to save" criteria. This skill does not define new criteria; it applies the existing ones as a second pass over the whole session.
-2. **Dedup.** Cross-check candidates against the current `MEMORY.md` index (already loaded in context). Drop anything already captured there or in a linked topic file. Only genuine gaps reach step 3.
+2. **Dedup.** Cross-check candidates against the current `MEMORY.md` index (already loaded in context). Drop anything already captured there or in a linked topic file. If `MEMORY.md` doesn't exist yet (no memories saved so far), treat that the same as an empty index — there's nothing to dedup against, so all scan candidates are gaps. Only genuine gaps reach step 3.
 3. **Report or stay silent.**
    - **No candidates survive dedup:** say nothing beyond the normal conversational wrap-up. Do not mention this skill ran. This is the common case and must add zero friction.
    - **Candidates survive:** present them as a single short bulleted list, one line per candidate (type + one-line summary), then ask once, in batch, which (if any) to save. Do not ask per-item. Do not write anything before the user answers.
