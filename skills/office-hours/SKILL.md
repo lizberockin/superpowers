@@ -23,14 +23,14 @@ Before asking any clarifying questions, ground yourself in what's already known 
 
 **Wiki context (primary source):** search `docs/solutions/` and `CONCEPTS.md` for anything relevant to the area the user wants to change. If either doesn't exist yet, treat this as a cold project and move on — an empty wiki is a normal state, not an error.
 
-**Fallback context:** if the wiki is empty or the repo hasn't adopted it, fall back to `docs/superpowers/specs/`, `docs/superpowers/plans/`, and `git log --oneline -20` for relevant prior context.
+**Fallback context:** if the wiki is empty or the repo hasn't adopted it, fall back to `docs/specs/`, `docs/plans/`, and `git log --oneline -20` for relevant prior context.
 
 1. Read `CLAUDE.md`, `TODOS.md` (if they exist).
 2. Run `git log --oneline -30` and `git diff origin/main --stat 2>/dev/null` to understand recent context.
 3. Use Grep/Glob to map the codebase areas most relevant to the user's request.
 4. **List prior office-hours sessions for this project:**
    ```bash
-   ls -t docs/superpowers/office-hours/*.md 2>/dev/null
+   ls -t docs/office-hours/*.md 2>/dev/null
    ```
    If prior sessions exist, list them: "Prior office-hours sessions for this project: [titles + dates]"
 5. **Ask: what's your goal with this?** This is a real question, not a formality. The answer determines everything about how the session runs.
@@ -288,7 +288,7 @@ After the user states the problem (first question in Phase 2A or 2B), search pri
 
 Extract 3-5 significant keywords from the user's problem statement and grep across this project's prior sessions:
 ```bash
-grep -li "<keyword1>\|<keyword2>\|<keyword3>" docs/superpowers/office-hours/*.md 2>/dev/null
+grep -li "<keyword1>\|<keyword2>\|<keyword3>" docs/office-hours/*.md 2>/dev/null
 ```
 
 If matches found, read the matching docs and surface them:

@@ -3,7 +3,7 @@
 Write the design document into the repo.
 
 ```bash
-mkdir -p docs/superpowers/office-hours
+mkdir -p docs/office-hours
 BRANCH=$(git branch --show-current 2>/dev/null || echo 'no-branch')
 DATE=$(date +%Y-%m-%d)
 ```
@@ -15,11 +15,11 @@ filenames.
 **Design lineage:** Before writing, check for an existing office-hours doc on
 this branch (match on the doc's `Branch:` header field, not the filename):
 ```bash
-PRIOR=$(grep -l "^Branch: $BRANCH$" docs/superpowers/office-hours/*.md 2>/dev/null | xargs ls -t 2>/dev/null | head -1)
+PRIOR=$(grep -l "^Branch: $BRANCH$" docs/office-hours/*.md 2>/dev/null | xargs ls -t 2>/dev/null | head -1)
 ```
 If `$PRIOR` exists, the new doc gets a `Supersedes:` field referencing it. This creates a revision chain — you can trace how a design evolved across office hours sessions.
 
-Write to `docs/superpowers/office-hours/{date}-{topic-slug}-office-hours.md`.
+Write to `docs/office-hours/{date}-{topic-slug}-office-hours.md`.
 
 After writing the design doc, tell the user:
 **"Design doc saved to: {full path}. A future `plan-ceo-review` or `plan-eng-review` will find it automatically."**

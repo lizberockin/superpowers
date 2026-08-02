@@ -1,7 +1,7 @@
 # Design: Expand the Skill Priority Routing Table to Full Coverage
 
 **Date:** 2026-07-20
-**Source:** Survivor idea 5 of [docs/ideation/2026-07-19-onboarding-docs-ideation.md](../../ideation/2026-07-19-onboarding-docs-ideation.md)
+**Source:** Survivor idea 5 of [docs/ideation/2026-07-19-onboarding-docs-ideation.md](../ideation/2026-07-19-onboarding-docs-ideation.md)
 **Scope:** `skills/using-superpowers/SKILL.md` only. Depends on idea 1 (skill catalog generator), already shipped on this branch, so both surfaces are sourced the same way.
 
 ## Problem

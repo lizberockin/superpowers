@@ -1,7 +1,7 @@
 # Design: Consolidated Troubleshooting / FAQ Doc
 
 **Date:** 2026-07-20
-**Source:** Survivor idea 2 of [docs/ideation/2026-07-19-onboarding-docs-ideation.md](../../ideation/2026-07-19-onboarding-docs-ideation.md)
+**Source:** Survivor idea 2 of [docs/ideation/2026-07-19-onboarding-docs-ideation.md](../ideation/2026-07-19-onboarding-docs-ideation.md)
 **Scope:** New `TROUBLESHOOTING.md` at repo root, plus one link each from `README.md` and `skills/using-superpowers/SKILL.md`.
 
 ## Problem

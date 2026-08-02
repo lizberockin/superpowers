@@ -1,7 +1,7 @@
 # Design: Auto-Generate the Skill Catalog from Frontmatter
 
 **Date:** 2026-07-20
-**Source:** Survivor idea 1 of [docs/ideation/2026-07-19-onboarding-docs-ideation.md](../../ideation/2026-07-19-onboarding-docs-ideation.md)
+**Source:** Survivor idea 1 of [docs/ideation/2026-07-19-onboarding-docs-ideation.md](../ideation/2026-07-19-onboarding-docs-ideation.md)
 **Scope:** A generator script + README.md restructure. Built first on this branch as a prerequisite for idea 5 (routing table expansion), which was deferred pending this project so both surfaces are sourced the same way.
 
 ## Problem

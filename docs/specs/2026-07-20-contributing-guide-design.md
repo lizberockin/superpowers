@@ -1,7 +1,7 @@
 # Design: CONTRIBUTING.md + Description-Skip Warning Placement
 
 **Date:** 2026-07-20
-**Source:** Survivor idea 3 of [docs/ideation/2026-07-19-onboarding-docs-ideation.md](../../ideation/2026-07-19-onboarding-docs-ideation.md)
+**Source:** Survivor idea 3 of [docs/ideation/2026-07-19-onboarding-docs-ideation.md](../ideation/2026-07-19-onboarding-docs-ideation.md)
 **Scope:** Docs-only (no lint check, no CI) — first of six low/medium-complexity onboarding-docs projects, sequenced low-complexity-first.
 
 ## Problem

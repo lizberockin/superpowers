@@ -1,7 +1,7 @@
 # Design: README Worked Example
 
 **Date:** 2026-07-20
-**Source:** Survivor idea 4 of [docs/ideation/2026-07-19-onboarding-docs-ideation.md](../../ideation/2026-07-19-onboarding-docs-ideation.md)
+**Source:** Survivor idea 4 of [docs/ideation/2026-07-19-onboarding-docs-ideation.md](../ideation/2026-07-19-onboarding-docs-ideation.md)
 **Scope:** README.md only. Second of six onboarding-docs projects, sequenced low-complexity-first (follows [2026-07-20-contributing-guide-design.md](2026-07-20-contributing-guide-design.md)).
 
 ## Problem
