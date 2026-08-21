@@ -5,6 +5,8 @@ description: Use when executing implementation plans with independent tasks in t
 
 # Subagent-Driven Development
 
+**See also:** `writing-for-agents` — reference for writing any agent-facing document. The prompt-construction rules below (File Handoffs, Constructing Reviewer Prompts) are this skill's tested specifics; reach for `writing-for-agents` when a dispatch prompt isn't covered by those rules, or when one feels bloated and you need the vocabulary (context load, no-op test, completion-criteria clarity) to diagnose why.
+
 Execute plan by dispatching a fresh implementer subagent per task, a task review (spec compliance + code quality) after each, and a broad whole-branch review at the end.
 
 **Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.

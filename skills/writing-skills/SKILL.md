@@ -19,6 +19,8 @@ You write test cases (pressure scenarios with subagents), watch them fail (basel
 
 **Official guidance:** For Anthropic's official skill authoring best practices, see anthropic-best-practices.md. This document provides additional patterns and guidelines that complement the TDD-focused approach in this skill.
 
+**See also:** `writing-for-agents` — reference for the craft of the prose itself: context pointers, pruning, completion criteria, leading words. This skill owns testing whether a skill works; `writing-for-agents` owns whether the document is well-written once it does. Reach for it when a draft skill reads bloated or a description isn't triggering reliably.
+
 ## What is a Skill?
 
 A **skill** is a reference guide for proven techniques, patterns, or tools. Skills help future agents find and apply effective approaches.
