@@ -1,6 +1,6 @@
 ---
 name: ideate
-description: Use when the user asks for ideas, improvements, surprising options, or AI-generated directions before choosing one to develop — generates and evaluates grounded ideas via parallel research subagents. Use brainstorming instead to refine an idea the user already has in mind.
+description: Use when the user asks for ideas, improvements, surprising options, or AI-generated directions before choosing one to develop - generates and evaluates grounded ideas via parallel research subagents. Use brainstorming instead to refine an idea the user already has in mind.
 ---
 
 # Generate Improvement Ideas

@@ -52,6 +52,17 @@ strip_quotes() {
 # " — " (em dash) or " - " (hyphen) separator, whichever comes first.
 # Descriptions use these inconsistently to separate the trigger clause
 # from the mechanism/rationale clause that follows.
+#
+# Two latent edge cases, neither triggered by any description in the
+# library today, but both silent if a future one hits them:
+#   - The match is leftmost-only. A description with an earlier,
+#     unintended " - " or " — " (a hyphenated word, a parenthetical)
+#     truncates the trigger clause at the wrong point instead of at the
+#     intended separator.
+#   - If no separator matches at all, sed's substitution is a no-op:
+#     the entire, possibly multi-sentence description passes through
+#     unchanged into the routing table, rather than just its trigger
+#     clause.
 extract_trigger_clause() {
   local desc="$1"
   case "$desc" in

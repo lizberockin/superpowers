@@ -1,11 +1,11 @@
 ---
 name: compound-memory
-description: Use when the user signals the session is wrapping up — checks whether anything worth remembering was never saved to Claude Code's Auto Memory.
+description: Use when the user signals the session is wrapping up - checks whether anything worth remembering was never saved to Claude Code's Auto Memory.
 ---
 
 # Compound Memory
 
-**See also:** `superpowers:compound-learnings` — captures team-shared docs/solutions in `docs/solutions/` or `CONCEPTS.md`, not personal Auto Memory entries; `consolidate-memory` — a hygiene pass over memory entries that already exist, rather than catching new ones that were missed. Use this skill to catch missed captures at session wind-down; use the others for their respective jobs.
+**See also:** `superpowers:compound-learnings` — captures team-shared docs/solutions in `docs/solutions/` or `CONCEPTS.md`, not personal Auto Memory entries. Use this skill to catch missed captures at session wind-down; use `compound-learnings` for its own job.
 
 ## Overview
 
@@ -52,4 +52,4 @@ Ask for compound-memory by name to check for anything to remember, without waiti
 
 - No `Stop` or `SessionEnd` hook — this is a semantic auto-invoke skill only.
 - No raw-transcript retention.
-- No changes to `compound-learnings` (team docs) or `consolidate-memory` (hygiene pass on existing entries) — this skill only adds missed captures.
+- No changes to `compound-learnings` (team docs) — this skill only adds missed captures.

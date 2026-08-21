@@ -87,6 +87,13 @@ skills/
 1. **Heavy reference** (100+ lines) - API docs, comprehensive syntax
 2. **Reusable tools** - Scripts, utilities, templates
 
+**Subdirectory naming**, once a skill has enough separate files to group:
+- `references/` - prose or lookup content loaded just-in-time (guides, schemas, worked examples, agent prompts)
+- `scripts/` - executable tools (shell, Python, JS)
+- `assets/` - fill-in templates or scaffolding copied into new output, not read for understanding (rare - most skills need only the two above)
+
+Don't invent another name for the first two purposes (`examples/`, `docs/`, `lib/`, ...) - a worked example is still reference content a reader loads just-in-time, so it belongs in `references/` alongside everything else in that category.
+
 **Keep inline:**
 - Principles and concepts
 - Code patterns (< 50 lines)
@@ -371,10 +378,11 @@ When: Tool is reusable code, not just narrative
 ### Skill with Heavy Reference
 ```
 pptx/
-  SKILL.md       # Overview + workflows
-  pptxgenjs.md   # 600 lines API reference
-  ooxml.md       # 500 lines XML structure
-  scripts/       # Executable tools
+  SKILL.md          # Overview + workflows
+  references/       # Reference docs, loaded just-in-time
+    pptxgenjs.md     #   600 lines API reference
+    ooxml.md         #   500 lines XML structure
+  scripts/          # Executable tools
 ```
 When: Reference material too large for inline
 

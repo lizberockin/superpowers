@@ -1,11 +1,11 @@
 ---
 name: compound-learnings
-description: Use when a problem was just solved, a durable project convention was established, or project-specific vocabulary emerged — captures it as searchable documentation in docs/solutions/ or CONCEPTS.md before the context is lost.
+description: Use when a problem was just solved, a durable project convention was established, or project-specific vocabulary emerged - captures it as searchable documentation in docs/solutions/ or CONCEPTS.md before the context is lost.
 ---
 
 # Compound Learnings
 
-**See also:** `superpowers:writing-skills` — this skill documents a *one-off solved problem*, scoped to `docs/solutions/`. If the same technique keeps recurring across unrelated projects, that's a signal it should become a portable skill instead of another solutions doc — see `writing-skills` for that path.
+**See also:** `superpowers:writing-skills` — this skill documents a *one-off solved problem*, scoped to `docs/solutions/`. If the same technique keeps recurring across unrelated projects, that's a signal it should become a portable skill instead of another solutions doc — see `writing-skills` for that path. `superpowers:compound-memory` — that skill catches missed personal Auto Memory entries at session wind-down; this one captures team-shared docs/solutions and durable conventions instead.
 
 Coordinate multiple subagents working in parallel to document a recently solved problem.
 
