@@ -5,6 +5,8 @@ description: Use when facing 2+ independent tasks that can be worked on without 
 
 # Dispatching Parallel Agents
 
+**See also:** `writing-for-agents` — reference for writing any agent-facing document. "Agent Prompt Structure" below (Focused, Self-contained, Specific about output) is this skill's compressed version of that skill's completion-criteria and information-hierarchy levers; reach for `writing-for-agents` when a prompt needs more than the three-line checklist here.
+
 ## Overview
 
 You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
