@@ -74,7 +74,7 @@ assert_count() {
     local expected="$3"
     local test_name="${4:-test}"
 
-    local actual=$(echo "$output" | grep -c "$pattern" || echo "0")
+    local actual=$(echo "$output" | grep -c "$pattern")
 
     if [ "$actual" -eq "$expected" ]; then
         echo "  [PASS] $test_name (found $actual instances)"

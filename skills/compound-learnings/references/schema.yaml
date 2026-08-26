@@ -91,7 +91,7 @@ track_rules:
         description: "Observable symptoms such as errors or broken behavior"
       root_cause:
         type: enum
-        values:
+        values: &root_cause_values
           - missing_association
           - missing_include
           - missing_index
@@ -112,7 +112,7 @@ track_rules:
         description: "Fundamental technical cause of the problem"
       resolution_type:
         type: enum
-        values:
+        values: &resolution_type_values
           - code_fix
           - migration
           - config_change
@@ -137,38 +137,11 @@ track_rules:
         description: "Observable gaps or friction that prompted this guidance (optional for knowledge track)"
       root_cause:
         type: enum
-        values:
-          - missing_association
-          - missing_include
-          - missing_index
-          - wrong_api
-          - scope_issue
-          - thread_violation
-          - async_timing
-          - memory_leak
-          - config_error
-          - logic_error
-          - test_isolation
-          - missing_validation
-          - missing_permission
-          - missing_workflow_step
-          - inadequate_documentation
-          - missing_tooling
-          - incomplete_setup
+        values: *root_cause_values
         description: "Underlying cause, if there is a specific one (optional for knowledge track)"
       resolution_type:
         type: enum
-        values:
-          - code_fix
-          - migration
-          - config_change
-          - test_fix
-          - dependency_update
-          - environment_setup
-          - workflow_improvement
-          - documentation_update
-          - tooling_addition
-          - seed_data_update
+        values: *resolution_type_values
         description: "Type of change, if applicable (optional for knowledge track)"
 
 # --- Fields optional for BOTH tracks ----------------------------------------

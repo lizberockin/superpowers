@@ -301,19 +301,21 @@ function browserLauncherForPlatform(url, {
   return null;
 }
 
+let cachedRealContentDir = null;
+
 function isRegularFileInsideContentDir(filePath) {
-  let stat, realContentDir, realFilePath;
+  let stat, realFilePath;
   try {
     stat = fs.lstatSync(filePath);
     if (stat.isSymbolicLink()) return false;
     if (!stat.isFile()) return false;
     if (stat.nlink !== 1) return false;
-    realContentDir = fs.realpathSync(CONTENT_DIR);
+    if (cachedRealContentDir === null) cachedRealContentDir = fs.realpathSync(CONTENT_DIR);
     realFilePath = fs.realpathSync(filePath);
   } catch (e) {
     return false;
   }
-  return realFilePath.startsWith(realContentDir + path.sep);
+  return realFilePath.startsWith(cachedRealContentDir + path.sep);
 }
 
 // ========== Authentication ==========
@@ -339,13 +341,9 @@ function parseCookies(header) {
 // A request is authorized if it carries the session key as ?key= or as the
 // session cookie. Both are compared in constant time.
 function isAuthorized(req) {
-  const q = req.url.indexOf('?');
-  if (q >= 0) {
-    const params = new URLSearchParams(req.url.slice(q + 1));
-    if (params.has('key')) {
-      const key = params.get('key');
-      return Boolean(key && timingSafeEqualStr(key, TOKEN));
-    }
+  const key = queryKey(req.url);
+  if (key !== null) {
+    return Boolean(key && timingSafeEqualStr(key, TOKEN));
   }
   const cookie = parseCookies(req.headers['cookie'])[COOKIE_NAME];
   if (cookie && timingSafeEqualStr(cookie, TOKEN)) return true;
