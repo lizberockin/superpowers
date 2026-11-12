@@ -92,6 +92,7 @@ Good agent prompts are:
 1. **Focused** - One clear problem domain
 2. **Self-contained** - All context needed to understand the problem
 3. **Specific about output** - What should the agent return?
+4. **Bound by the Completion Contract** - paste the contract below into every prompt
 
 ```markdown
 Fix the 3 failing tests in src/agents/agent-tool-abort.test.ts:
@@ -113,6 +114,16 @@ Do NOT just increase timeouts - find the real issue.
 
 Return: Summary of what you found and what you fixed.
 ```
+
+## Completion Contract
+
+Applies to every dispatched agent at every depth (child, grandchild). Paste it into each prompt:
+
+1. **Your final message is the deliverable.** A spawned task is not a completed task. Ending your turn with "waiting for background agents" orphans their results: a finished child cannot notify a parent whose turn has ended.
+2. **If you delegate, you own collection.** Wait for every child, integrate the results, then return.
+3. **Split only what won't fit in one context.** Don't re-delegate a task already sized for one agent.
+
+The top-level session is the one exception to waiting: it is re-invoked when background agents finish, so it may end its turn while they run.
 
 ## Common Mistakes
 
