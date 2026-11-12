@@ -51,6 +51,8 @@ You MUST complete each phase before proceeding to the next.
 
 **BEFORE attempting ANY fix:**
 
+**Check for a known solution first.** If a solutions store exists, search it for the error message or symptom: with `SUPERPOWERS_SOLUTIONS_ROOT` set to an absolute path, the store is `$SUPERPOWERS_SOLUTIONS_ROOT/<repo-name>/solutions/` (`<repo-name>` is the folder name of the main working tree, `basename "$(cd "$(git rev-parse --git-common-dir)/.." && pwd)"`, the same from a subdirectory or a linked worktree; `_general` if that command fails, i.e. outside a repository); otherwise it is `docs/solutions/` at the repository root. A match is evidence to verify against the current code, not a fix to apply; carry on with the steps below either way. If the directory does not exist, skip this.
+
 1. **Read Error Messages Carefully**
    - Don't skip past errors or warnings
    - They often contain the exact solution

@@ -9,6 +9,16 @@ description: Use when a problem was just solved, a durable project convention wa
 
 Coordinate multiple subagents working in parallel to document a recently solved problem.
 
+## Fork Overrides
+
+These take precedence over everything below.
+
+1. **Store location.** Wherever this skill says `docs/solutions/`, use the resolved store directory, called `$SOLUTIONS_DIR` below. Resolve it once, before any other work, and state it in your first line of output. If `printenv SUPERPOWERS_SOLUTIONS_ROOT` exits 0 (the variable is set, even if empty), its value must be an absolute path (starting with `/`); if it is not, stop and tell the user, because a relative or `~` path would make the commands below create directories inside the repository. Then `$SOLUTIONS_DIR` is `$SUPERPOWERS_SOLUTIONS_ROOT/<repo-name>/solutions/`, where `<repo-name>` is the folder name of the main working tree, `basename "$(cd "$(git rev-parse --git-common-dir)/.." && pwd)"`, which is the same from a subdirectory or a linked worktree (use `_general` if `git rev-parse --git-common-dir` fails, i.e. outside a repository). If the variable is not set, `$SOLUTIONS_DIR` is `docs/solutions/` at the repository root (`git rev-parse --show-toplevel`); outside a repository with the variable unset, stop and report that no store can be resolved. Quote `$SOLUTIONS_DIR` wherever it is used in a command. Category subdirectories nest under it unchanged.
+2. **Never create or edit `CONCEPTS.md`.** Skip the bootstrap request handling, Phase 2.4 and every vocabulary-capture step.
+3. **Never search session history.** Skip step 4 of Phase 1 and every use of `scripts/session-history/` and `references/agents/session-historian.md`; do not read session transcripts.
+4. **Never edit instruction files.** Skip the Discoverability Check and the discoverability steps in Lightweight mode.
+5. **No patient data.** A solution doc never contains patient identifiers, data values or row contents; describe problems and fixes with schema, column and model names only.
+
 ## Purpose
 
 Captures problem solutions while context is fresh, creating structured documentation in `docs/solutions/` with YAML frontmatter for searchability and future reference. Uses parallel subagents.
@@ -28,6 +38,7 @@ Invoke by describing what you want, same as any other skill:
 **One learning per run.** The workflow's grounding, overlap detection, and cross-referencing all assume a single solved problem. When a session produced multiple distinct learnings, run the skill once per learning, sequentially — each run grounds fresh against the tree. Do not batch several learnings through one run and stitch cross-references between the drafts afterward; drafting-context numbering ("Learning 3") leaking into written docs is the failure this rule prevents.
 
 ## CONCEPTS.md bootstrap requests
+> Disabled in this fork: see Fork Overrides. Skip this section.
 
 If invoked specifically to create or bootstrap `CONCEPTS.md` from scratch rather than to document a solved problem, do not run the normal phases — `compound-learnings` populates `CONCEPTS.md` only as a side effect of documenting a real learning (it seeds the *learning's area*, not the whole repo; see Phase 2.4). Building a repo-wide concept map from scratch is out of scope for this skill. Tell the user that directly — this skill only seeds `CONCEPTS.md` incrementally as real problems get documented — and exit.
 
@@ -35,12 +46,12 @@ If invoked specifically to create or bootstrap `CONCEPTS.md` from scratch rather
 
 Enter headless mode when **either** holds: the arguments you were invoked with contain the `mode:headless` token, **or** the invocation makes non-interactive intent unmistakable — a caller or standing instruction asking to run `compound-learnings` "headless", "non-interactively", "unattended", or "without prompts/questions". The token is the explicit form; a clear natural-language request for a non-interactive run is equivalent. Bare "automatically" or "auto-run" is **not** on its own a headless signal — it speaks to *invoking* the skill, not to suppressing its prompts — so an ambiguous or absent signal defaults to interactive. Tokens starting with `mode:` or `depth:` are flags, not context — strip them before treating the remainder as the brief context hint.
 
-Depth is an explicit headless-only selector. In headless mode, accept at most one depth token: `depth:lightweight` routes directly to Lightweight Mode, while `depth:full` routes to Full Mode with its automatic session-history probe. `mode:headless` without a `depth:` token remains backward compatible and runs Full Mode. Headless lightweight asks no blocking questions and launches no subagents. If the invocation contains an unknown `depth:` token, multiple `depth:` tokens, or a `depth:` token without headless intent, do not guess; emit the headless failure report with the reason and end with `Documentation skipped`.
+Depth is an explicit headless-only selector. In headless mode, accept at most one depth token: `depth:lightweight` routes directly to Lightweight Mode, while `depth:full` routes to Full Mode with its automatic session-history probe (disabled in this fork; see Fork Overrides). `mode:headless` without a `depth:` token remains backward compatible and runs Full Mode. Headless lightweight asks no blocking questions and launches no subagents. If the invocation contains an unknown `depth:` token, multiple `depth:` tokens, or a `depth:` token without headless intent, do not guess; emit the headless failure report with the reason and end with `Documentation skipped`.
 
 | Mode | When | Behavior |
 |------|------|----------|
-| **Interactive** (default) | No headless token or clear non-interactive intent | Auto-pick Full vs Lightweight and report the choice; run session history as an automatic probe (Full only); prompt for Discoverability Check consent; end with a plain summary (no "What's next?" menu) |
-| **Headless** | `mode:headless` token present, or the invocation makes non-interactive intent unmistakable | No blocking questions. Run the explicitly requested depth, defaulting to **Full mode** with the automatic session-history probe. If the Discoverability Check finds a gap, report it without editing instruction files. Skip Phase 3 specialized reviews. End with a structured terminal report — no "What's next?" menu. |
+| **Interactive** (default) | No headless token or clear non-interactive intent | Auto-pick Full vs Lightweight and report the choice; run session history as an automatic probe (Full only; disabled in this fork); prompt for Discoverability Check consent (disabled in this fork); end with a plain summary (no "What's next?" menu) |
+| **Headless** | `mode:headless` token present, or the invocation makes non-interactive intent unmistakable | No blocking questions. Run the explicitly requested depth, defaulting to **Full mode** with the automatic session-history probe (disabled in this fork). If the Discoverability Check finds a gap, report it without editing instruction files. Skip Phase 3 specialized reviews. End with a structured terminal report — no "What's next?" menu. |
 
 Headless mode is intended for automations and skill-to-skill invocation where no human is present to answer questions. Once detected, headless mode applies for the entire run.
 
@@ -77,9 +88,9 @@ When spawning subagents, pass the relevant file contents into the task prompt so
 - Choose **Lightweight** (single-pass, no subagents — see Lightweight Mode) ONLY under real context pressure: the session is near its context limit, or the fix is trivial enough that cross-referencing would add nothing. These are conditions the agent can observe and the user cannot, which is exactly why this is not a question.
 - State the chosen mode and a one-line reason as the first line of the completion output (e.g., "Ran Full mode." / "Ran Lightweight mode — session context was tight."). If Lightweight was the wrong call for the user's taste, re-running is a rare, cheap correction — cheaper than taxing every run with a prompt.
 
-**In headless mode**, skip automatic mode selection. Run the depth selected during Mode Detection: `depth:lightweight` enters Lightweight Mode; `depth:full` or no depth token enters Full Mode, including the automatic session-history probe (Phase 1 step 4).
+**In headless mode**, skip automatic mode selection. Run the depth selected during Mode Detection: `depth:lightweight` enters Lightweight Mode; `depth:full` or no depth token enters Full Mode, including the automatic session-history probe (Phase 1 step 4; disabled in this fork).
 
-**Session history — an automatic probe in Full mode, never a question.** The point of searching prior sessions is that an *unrelated* earlier session may hold related problem-solving; neither the agent nor the user can know that a priori, so asking is pointless. Instead, Full mode always runs the cheap discovery+metadata probe (Phase 1 step 4) — it runs in parallel with the research subagents, so it is near-free on wall-clock — and escalates to the expensive extraction+synthesis only when the probe surfaces genuinely relevant candidate sessions. Lightweight mode skips session history entirely; headless Full runs the same automatic probe, since it prompts for nothing and so keeps headless non-interactive. This support exists only inside the compounding workflow; there is no standalone session-history product surface.
+**Disabled in this fork (see Fork Overrides): do not run the session-history probe.** **Session history — an automatic probe in Full mode, never a question.** The point of searching prior sessions is that an *unrelated* earlier session may hold related problem-solving; neither the agent nor the user can know that a priori, so asking is pointless. Instead, Full mode always runs the cheap discovery+metadata probe (Phase 1 step 4) — it runs in parallel with the research subagents, so it is near-free on wall-clock — and escalates to the expensive extraction+synthesis only when the probe surfaces genuinely relevant candidate sessions. Lightweight mode skips session history entirely; headless Full runs the same automatic probe, since it prompts for nothing and so keeps headless non-interactive. This support exists only inside the compounding workflow; there is no standalone session-history product surface.
 
 ---
 
@@ -90,8 +101,8 @@ When spawning subagents, pass the relevant file contents into the task prompt so
 
 Phase 1 subagents write their full structured output to a per-run scratch artifact under `<run-dir>/` and return only a compact confirmation containing the artifact path. The orchestrator Reads those artifacts back in Phase 2 assembly. This is scratch space for coordinating the run, not a deliverable — it does not make the scratch files additional deliverables. **Only the orchestrator writes product files** — the final solution doc and the maintenance side effects below. Subagents must not touch `docs/`, project instruction files, or any tracked path. Beyond the Phase 2 solution doc, the orchestrator may also write maintenance side effects — not additional deliverables, and creating one when absent is expected, not a violation of this rule. There are three write-target classes; only the first two are unconditional:
 - **`docs/solutions/...`** — the primary deliverable (always).
-- **`CONCEPTS.md`** — create or update in Phase 2.4 (Vocabulary Capture) when a qualifying domain term surfaces (Full mode; every mode that reaches vocabulary capture may refine an existing file).
-- **A project instruction file** (AGENTS.md or CLAUDE.md) — a small edit when the Discoverability Check finds a gap, **only in interactive Full mode after consent**. Headless and lightweight never apply this edit (they report or tip instead). Callers that hand off headless after an approval gate must not see an unreviewed change to the repo's operating contract.
+- **`CONCEPTS.md`** — (disabled in this fork; never created or edited) create or update in Phase 2.4 (Vocabulary Capture) when a qualifying domain term surfaces (Full mode; every mode that reaches vocabulary capture may refine an existing file).
+- **A project instruction file** (AGENTS.md or CLAUDE.md) — (disabled in this fork; never edited) a small edit when the Discoverability Check finds a gap, **only in interactive Full mode after consent**. Headless and lightweight never apply this edit (they report or tip instead). Callers that hand off headless after an approval gate must not see an unreviewed change to the repo's operating contract.
 
 `CONCEPTS.md` and the instruction-file edit ensure future agents can discover and ground in the knowledge store; neither makes the documentation any less the single deliverable.
 
@@ -139,9 +150,9 @@ echo "$RUN_DIR";
 
 **Resolve current vocabulary and conventions before dispatching subagents.** Use the project's active instructions and conventions already in your context. If `CONCEPTS.md` exists, read its relevant terms and pass them to the Context Analyzer.
 
-**CRITICAL — glob `docs/solutions/` fresh every run.** The current vocabulary and conventions above do not substitute for the live-tree search in step 3.
+**CRITICAL — glob the resolved store (`$SOLUTIONS_DIR`) fresh every run.** The current vocabulary and conventions above do not substitute for the live-tree search in step 3.
 
-Pass `{run_id}` and the resolved absolute `{run_dir}` into every Phase 1 subagent prompt. Each subagent **writes its full structured output** to its own file under `{run_dir}/`, **confirms the write succeeded** (the file exists and is non-empty), and then **returns only a one-line confirmation containing the artifact path** — not the prose body inline. Artifact filenames by subagent:
+Pass `{run_id}`, the resolved absolute `{run_dir}` and the resolved absolute `$SOLUTIONS_DIR` into every Phase 1 subagent prompt, together with Fork Override 5 (no patient data in anything they write or quote; redact data values from error messages) and an instruction to read every `docs/solutions/` in the references as `$SOLUTIONS_DIR`. Each subagent **writes its full structured output** to its own file under `{run_dir}/`, **confirms the write succeeded** (the file exists and is non-empty), and then **returns only a one-line confirmation containing the artifact path** — not the prose body inline. Artifact filenames by subagent:
 
 - **Context Analyzer** → `{run_dir}/context.json` (frontmatter skeleton, category path, filename, track)
 - **Solution Extractor** → `{run_dir}/solution.md` (the full doc-body prose sections)
@@ -152,7 +163,7 @@ Pass `{run_id}` and the resolved absolute `{run_dir}` into every Phase 1 subagen
 
 **Dispatch order:**
 - Launch `Context Analyzer`, `Solution Extractor`, and `Related Docs Finder` in parallel (background)
-- **Then** run the internal session-history discovery/extraction/synthesis flow (see step 4 below) in Full mode, including headless — skipped only in lightweight. Its cheap discovery+metadata probe always runs; it escalates to extraction+synthesis only on a relevance hit (see step 4's Escalation gate). This flow is synchronous from this orchestrator's main-context turn, but the already-dispatched background subagents continue running in parallel underneath, so the wall-clock benefit is preserved (`max(session-history, slowest background subagent)`, not their sum). Running session history before the parallel block would serialize it in front of the research subagents and regress wall-clock time.
+- (Disabled in this fork: skip this bullet; see Fork Overrides.) **Then** run the internal session-history discovery/extraction/synthesis flow (see step 4 below) in Full mode, including headless — skipped only in lightweight. Its cheap discovery+metadata probe always runs; it escalates to extraction+synthesis only on a relevance hit (see step 4's Escalation gate). This flow is synchronous from this orchestrator's main-context turn, but the already-dispatched background subagents continue running in parallel underneath, so the wall-clock benefit is preserved (`max(session-history, slowest background subagent)`, not their sum). Running session history before the parallel block would serialize it in front of the research subagents and regress wall-clock time.
 
 <parallel_tasks>
 
@@ -196,7 +207,7 @@ Pass `{run_id}` and the resolved absolute `{run_dir}` into every Phase 1 subagen
    - **Examples**: Concrete before/after or usage examples showing the practice in action
 
 #### 3. **Related Docs Finder**
-   - Searches `docs/solutions/` for related documentation
+   - Searches the resolved store (`$SOLUTIONS_DIR`) for related documentation
    - Identifies cross-references and links
    - Finds related GitHub issues
    - Flags any related learning or pattern docs that may now be stale, contradicted, or overly broad
@@ -209,7 +220,7 @@ Pass `{run_id}` and the resolved absolute `{run_dir}` into every Phase 1 subagen
    **Search strategy (grep-first filtering for efficiency):**
 
    1. Extract keywords from the problem context: module names, technical terms, error messages, component types
-   2. If the problem category is clear, narrow search to the matching `docs/solutions/<category>/` directory
+   2. If the problem category is clear, narrow search to the matching `$SOLUTIONS_DIR/<category>/` directory
    3. Use the native content-search tool (e.g., Grep in Claude Code) to pre-filter candidate files BEFORE reading any content. Run multiple searches in parallel, case-insensitive, targeting frontmatter fields. These are template patterns -- substitute actual keywords:
       - `title:.*<keyword>`
       - `tags:.*(<keyword1>|<keyword2>)`
@@ -227,6 +238,7 @@ Pass `{run_id}` and the resolved absolute `{run_dir}` into every Phase 1 subagen
 </parallel_tasks>
 
 #### 4. **Session History** (internal flow after launching the parallel block — automatic in Full mode, including headless)
+> Disabled in this fork: see Fork Overrides. Skip this section.
    - **Skip entirely** in lightweight mode. In Full mode (including headless) it always runs as a two-stage probe: the cheap discovery+metadata pass (below) always executes, and the expensive extraction+synthesis executes only when the probe clears the relevance gate (see **Escalation gate** below).
    - Run session discovery, branch/keyword filtering, scan-window selection, deep-dive selection, and per-session extraction directly inside this skill using `scripts/session-history/`.
    - Read the skill-local synthesis prompt at `references/agents/session-historian.md`, then dispatch a generic subagent using that prompt content. Do not dispatch a standalone agent by type/name.
@@ -287,7 +299,7 @@ Pass `{run_id}` and the resolved absolute `{run_dir}` into every Phase 1 subagen
 
 <sequential_tasks>
 
-**WAIT for all Phase 1 inputs to complete before proceeding** — the three parallel subagents and, in Full mode, the internal session-history flow (which may have stopped at the probe with `no relevant prior sessions`). Session history is a Phase 1 input even though it runs in the orchestrator rather than as a public skill.
+**WAIT for all Phase 1 inputs to complete before proceeding** — the three parallel subagents and, in Full mode, the internal session-history flow (disabled in this fork: it never runs, so there is nothing to wait for; it may have stopped at the probe with `no relevant prior sessions`). Session history is a Phase 1 input even though it runs in the orchestrator rather than as a public skill.
 
 The orchestrating agent (main conversation) performs these steps:
 
@@ -311,8 +323,8 @@ The orchestrating agent (main conversation) performs these steps:
    - If findings are thin or "no relevant prior sessions," proceed without session context
 4. Assemble complete markdown file from the collected pieces, reading `assets/resolution-template.md` for the section structure of new docs
 5. Validate YAML frontmatter against `references/schema.yaml`, including the YAML-safety quoting rule for array items (see `references/yaml-schema.md` > YAML Safety Rules)
-6. Create directory if needed: `mkdir -p docs/solutions/[category]/`
-7. Write the file: either the updated existing doc or the new `docs/solutions/[category]/[filename].md`
+6. Create directory if needed: `mkdir -p "$SOLUTIONS_DIR/[category]/"`
+7. Write the file: either the updated existing doc or the new `$SOLUTIONS_DIR/[category]/[filename].md` (redact per Fork Override 5 first: no patient identifiers, data values or row contents)
 8. **Validate parser-safety of the written frontmatter** to catch silent-corruption issues the prose rules miss: malformed `---` delimiter lines, unquoted ` #` in scalar values (silent comment truncation), and unquoted `: ` in scalar values (silent mapping confusion). The bundled validator ships **inside the skill bundle**; on Claude Code `${CLAUDE_SKILL_DIR}` resolves to the skill directory, but the runtime Bash tool's CWD is the user's project, so a project-relative path (without the `${CLAUDE_SKILL_DIR}` prefix) would miss. Run it through an existence guard so platforms that cannot locate the script (e.g. native Codex/Gemini installs, where `${CLAUDE_SKILL_DIR}` is unset) fall back to a manual check instead of silently skipping the protection:
 
    ```bash
@@ -336,6 +348,7 @@ When creating a new doc, preserve the section order from `assets/resolution-temp
 </sequential_tasks>
 
 ### Phase 2.4: Vocabulary Capture
+> Disabled in this fork: see Fork Overrides. Skip this section.
 
 **First, read `references/concepts-vocabulary.md`.** This is unconditional. Do not pre-judge from memory that nothing qualifies — the reference's criteria are non-obvious and qualifying terms often live in the surrounding conversation rather than the new doc itself. Reading the reference is what makes the rest of the phase possible.
 
@@ -413,6 +426,7 @@ A single scope hint may still point at multiple related docs when the change is 
 Always capture the new learning first. Refresh is a targeted maintenance follow-up, not a prerequisite for documentation.
 
 ### Discoverability Check
+> Disabled in this fork: see Fork Overrides. Skip this section.
 
 After the learning is written and the refresh decision is made, check whether the project's instruction files would lead an agent to discover and search `docs/solutions/` before starting work in a documented area. This runs every time — the knowledge store only compounds value when agents can find it.
 
@@ -488,12 +502,12 @@ The orchestrator (main conversation) performs ALL of the following in one sequen
 
 1. **Extract from conversation**: Identify the problem and solution from conversation history. Also scan the "user's auto-memory" block injected into your system prompt, if present (Claude Code only) -- use any relevant notes as supplementary context alongside conversation history. Tag any memory-sourced content incorporated into the final doc with "(auto memory [claude])". Before asserting how code behaves (enum values, status semantics, limits, defaults), Read the defining line at the current tree — soften or attribute any claim you cannot verify. Cite PR numbers over bare commit SHAs, and phrase unmerged fixes as pending
 2. **Classify**: Read `references/schema.yaml` and `references/yaml-schema.md`, then determine track (bug vs knowledge), category, and filename
-3. **Write minimal doc**: Before writing, check whether the exact proposed `docs/solutions/[category]/[filename].md` path exists. If it exists, read it: update it only when it covers the same problem, preserving its path and frontmatter structure and adding `last_updated: YYYY-MM-DD`; otherwise choose a distinct, descriptive filename and re-check that exact path is absent before writing. This is exact-path collision handling only — do not run Full mode's semantic overlap research or dispatch subagents. Create or update the doc using the appropriate track template from `assets/resolution-template.md`, with:
+3. **Write minimal doc**: Before writing, check whether the exact proposed `$SOLUTIONS_DIR/[category]/[filename].md` path exists. If it exists, read it: update it only when it covers the same problem, preserving its path and frontmatter structure and adding `last_updated: YYYY-MM-DD`; otherwise choose a distinct, descriptive filename and re-check that exact path is absent before writing. This is exact-path collision handling only — do not run Full mode's semantic overlap research or dispatch subagents. Create or update the doc using the appropriate track template from `assets/resolution-template.md`, with:
    - YAML frontmatter with track-appropriate fields, applying the YAML-safety quoting rule for array items (see `references/yaml-schema.md` > YAML Safety Rules)
    - Bug track: Problem, root cause, solution with key code snippets, one prevention tip
    - Knowledge track: Context, guidance with key examples, one applicability note
-4. **Vocabulary capture (update-only)**: if `CONCEPTS.md` exists at repo root, read `references/concepts-vocabulary.md`, then scan the new doc and the conversation for qualifying terms and add/refine entries silently (same criteria as Phase 2.4). Do **not** bootstrap or seed in lightweight mode — if `CONCEPTS.md` does not exist, defer creation to a Full run, which owns seeding. Record the outcome in the output (e.g., "Vocabulary: 1 entry refined" or "scanned, no qualifying terms"). If you refined `CONCEPTS.md` and the project's active instructions and conventions already in your context do not surface it, add the discoverability tip to the output below — lightweight **tips**, it does not edit instruction files (an interactive Full run owns that edit after consent; headless Full also tips/reports only).
-5. **Read-only discoverability check**: Using the project's active instructions and conventions already in your context, assess whether they surface `docs/solutions/` against the three criteria under **Discoverability Check** above. Do not open, offer to edit, or edit instruction files; Lightweight only reports the result. Record one of:
+4. **Vocabulary capture (update-only)** — disabled in this fork; skip this step (see Fork Overrides): if `CONCEPTS.md` exists at repo root, read `references/concepts-vocabulary.md`, then scan the new doc and the conversation for qualifying terms and add/refine entries silently (same criteria as Phase 2.4). Do **not** bootstrap or seed in lightweight mode — if `CONCEPTS.md` does not exist, defer creation to a Full run, which owns seeding. Record the outcome in the output (e.g., "Vocabulary: 1 entry refined" or "scanned, no qualifying terms"). If you refined `CONCEPTS.md` and the project's active instructions and conventions already in your context do not surface it, add the discoverability tip to the output below — lightweight **tips**, it does not edit instruction files (an interactive Full run owns that edit after consent; headless Full also tips/reports only).
+5. **Read-only discoverability check** — disabled in this fork; skip this step (see Fork Overrides): Using the project's active instructions and conventions already in your context, assess whether they surface `docs/solutions/` against the three criteria under **Discoverability Check** above. Do not open, offer to edit, or edit instruction files; Lightweight only reports the result. Record one of:
    - `no gap` when active project instructions surface the knowledge store
    - `gap noted — instruction-file tip emitted` when active project instructions exist but do not surface it
    - `not applicable — no active project instructions` when no project instructions are active; emit no discoverability tip
@@ -521,7 +535,7 @@ Note: This was created in lightweight mode. For richer documentation
 semantic grounding validation), re-run compound-learnings in a fresh session.
 ```
 
-**No subagents are launched. No parallel tasks. The solution doc is the one deliverable** (Phase 2.4's update-only vocabulary capture may also refine an existing `CONCEPTS.md`).
+**No subagents are launched. No parallel tasks. The solution doc is the one deliverable** (Phase 2.4's update-only vocabulary capture may also refine an existing `CONCEPTS.md`; disabled in this fork, see Fork Overrides).
 
 In lightweight mode, the overlap check is skipped (no Related Docs Finder subagent). This means lightweight mode may create a doc that overlaps with an existing one. That is acceptable — flag it in the terminal report if it's an obvious narrow case, and leave it for a later, deliberate pass otherwise. Do not broaden into a large refresh sweep from a lightweight session.
 
@@ -593,6 +607,7 @@ Knowledge track:
 | Batching several learnings through one run and stitching cross-references between drafts | One learning per run; run the skill sequentially for each additional learning |
 
 ## Success Output
+> In this fork, skip the Session History, CONCEPTS.md and instruction-file (Discoverability) lines in the templates below; they describe disabled behaviour.
 
 ### Headless mode
 
