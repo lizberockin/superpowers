@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Opt-in pre-commit gate. Enable in your clone with: git config core.hooksPath .githooks
+exec "$(git rev-parse --show-toplevel)/scripts/check-all.sh"

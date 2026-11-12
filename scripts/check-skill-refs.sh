@@ -17,8 +17,8 @@
 #      established elsewhere on the same line.
 #
 # Exits 0 if every reference resolves to a real skills/<name>/ directory,
-# or 1 (printing each orphan) if any don't. No CI wiring — run by hand
-# before committing a skill edit.
+# or 1 (printing each orphan) if any don't. Run by scripts/check-all.sh;
+# can also be run by hand before committing a skill edit.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
