@@ -46,10 +46,24 @@ EOF
     printf '%s\n' "$file"
 }
 
-test_extraction_produces_17_entries_alphabetical() {
-    local desc="extraction produces 17 entries (excludes using-superpowers), alphabetically sorted"
-    local target
+count_routable_skills() {
+    local f name n=0
+    for f in "$REPO_ROOT"/skills/*/SKILL.md; do
+        name="$(awk 'NR==1 && $0=="---" { fm=1; next } fm && $0=="---" { exit } fm && /^name:/ { sub(/^name: */, ""); print; exit }' "$f")"
+        [ "$name" = "using-superpowers" ] && continue
+        if awk 'NR==1 && $0=="---" { fm=1; next } fm && $0=="---" { exit } fm && /^disable-model-invocation: *true/ { found=1 } END { exit !found }' "$f"; then
+            continue
+        fi
+        n=$((n + 1))
+    done
+    echo "$n"
+}
+
+test_extraction_produces_one_entry_per_routable_skill_alphabetical() {
+    local desc="extraction produces one entry per routable skill (excludes using-superpowers and user-only skills), alphabetically sorted"
+    local target expected
     target="$(make_target_file "extraction.md")"
+    expected="$(count_routable_skills)"
 
     "$GENERATOR" "$target" > /dev/null
 
@@ -58,10 +72,10 @@ test_extraction_produces_17_entries_alphabetical() {
 
     local count
     count="$(printf '%s\n' "$block" | grep -c 'superpowers:')"
-    if [ "$count" -eq 17 ]; then
-        pass "$desc (17 entries)"
+    if [ "$count" -eq "$expected" ]; then
+        pass "$desc ($expected entries)"
     else
-        fail "$desc (expected 17 entries, got $count)"
+        fail "$desc (expected $expected entries, got $count)"
         printf '%s\n' "$block" | sed 's/^/      /'
     fi
 
@@ -82,7 +96,7 @@ test_extraction_produces_17_entries_alphabetical() {
 }
 
 test_brainstorming_omits_use_when_prefix() {
-    local desc="brainstorming's line omits the 'Use when' prefix; others include it"
+    local desc="brainstorming keeps its 'You MUST' wording and 'Use when' descriptions are unchanged"
     local target
     target="$(make_target_file "prefix.md")"
 
@@ -110,6 +124,52 @@ test_separator_styles_both_truncate() {
     else
         fail "$desc"
         grep -E 'finishing-a-development-branch|compound-learnings' "$target" | sed 's/^/      /'
+    fi
+}
+
+make_skills_dir() {
+    local dir="$TEST_ROOT/skills-fixture"
+    rm -rf "$dir"
+    mkdir -p "$dir/alpha" "$dir/beta" "$dir/gamma" "$dir/using-superpowers"
+    printf -- '---\nname: alpha\ndescription: Use when something happens - mechanism text follows\n---\n' > "$dir/alpha/SKILL.md"
+    printf -- '---\nname: beta\ndescription: Only the user invokes this one.\ndisable-model-invocation: true\n---\n' > "$dir/beta/SKILL.md"
+    printf -- '---\nname: gamma\ndescription: Diagnosis loop for hard bugs. Use when the user says "diagnose".\n---\n' > "$dir/gamma/SKILL.md"
+    printf -- '---\nname: using-superpowers\ndescription: Use when starting any conversation\n---\n' > "$dir/using-superpowers/SKILL.md"
+    printf '%s\n' "$dir"
+}
+
+test_skips_skills_that_disable_model_invocation() {
+    local desc="skills with disable-model-invocation: true are left out of the routing table"
+    local target skills
+    target="$(make_target_file "skip-user-only.md")"
+    skills="$(make_skills_dir)"
+
+    SKILLS_DIR="$skills" "$GENERATOR" "$target" > /dev/null
+
+    if grep -q 'superpowers:beta' "$target"; then
+        fail "$desc (beta is listed)"
+    elif grep -Fxq -- '- Use when something happens → superpowers:alpha' "$target"; then
+        pass "$desc"
+    else
+        fail "$desc (alpha line missing or wrong)"
+        grep 'superpowers:' "$target" | sed 's/^/      /'
+    fi
+}
+
+test_description_without_use_when_is_verbatim() {
+    local desc="a description that does not start with 'Use when' is used verbatim, with no prefix added"
+    local target skills expected
+    target="$(make_target_file "verbatim.md")"
+    skills="$(make_skills_dir)"
+    expected='- Diagnosis loop for hard bugs. Use when the user says "diagnose". → superpowers:gamma'
+
+    SKILLS_DIR="$skills" "$GENERATOR" "$target" > /dev/null
+
+    if grep -Fxq -- "$expected" "$target"; then
+        pass "$desc"
+    else
+        fail "$desc"
+        grep 'superpowers:gamma' "$target" | sed 's/^/      /'
     fi
 }
 
@@ -209,7 +269,9 @@ test_check_mode_passes_against_real_using_superpowers() {
 }
 
 echo "Running generate-routing-table.sh tests..."
-test_extraction_produces_17_entries_alphabetical
+test_extraction_produces_one_entry_per_routable_skill_alphabetical
+test_skips_skills_that_disable_model_invocation
+test_description_without_use_when_is_verbatim
 test_brainstorming_omits_use_when_prefix
 test_separator_styles_both_truncate
 test_check_mode_exits_0_when_in_sync

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 #
 # Generate the "Full Routing Reference" block in using-superpowers/SKILL.md
-# from every other skill's frontmatter description.
+# from every other skill's frontmatter description. Skills marked
+# `disable-model-invocation: true` are left out: they are user-invoked only.
+# Set SKILLS_DIR to read skills from somewhere other than <repo>/skills.
 #
 # Usage:
 #   scripts/generate-routing-table.sh [--check] [target-file]
@@ -22,6 +24,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 BEGIN_MARKER="<!-- BEGIN GENERATED ROUTING TABLE -->"
 END_MARKER="<!-- END GENERATED ROUTING TABLE -->"
 SELF_SKILL="using-superpowers"
+SKILLS_DIR="${SKILLS_DIR:-$REPO_ROOT/skills}"
 
 die() {
   echo "error: $*" >&2
@@ -48,45 +51,42 @@ strip_quotes() {
   printf '%s' "$s"
 }
 
-# Strips a leading "Use when " prefix, then truncates at the first
-# " — " (em dash) or " - " (hyphen) separator, whichever comes first.
-# Descriptions use these inconsistently to separate the trigger clause
-# from the mechanism/rationale clause that follows.
+# Truncates at the first " — " (em dash) or " - " (hyphen) separator,
+# whichever comes first. Descriptions use these inconsistently to
+# separate the trigger clause from the mechanism/rationale clause that
+# follows. The description is otherwise used verbatim, with no prefix
+# added or removed.
 #
-# Two latent edge cases, neither triggered by any description in the
-# library today, but both silent if a future one hits them:
+# One latent edge case, not triggered by any description in the library
+# today, but silent if a future one hits it:
 #   - The match is leftmost-only. A description with an earlier,
 #     unintended " - " or " — " (a hyphenated word, a parenthetical)
 #     truncates the trigger clause at the wrong point instead of at the
 #     intended separator.
-#   - If no separator matches at all, sed's substitution is a no-op:
-#     the entire, possibly multi-sentence description passes through
-#     unchanged into the routing table, rather than just its trigger
-#     clause.
+#
+# One intentional behaviour: if no separator matches, sed's substitution
+# is a no-op and the description passes through verbatim as its own
+# trigger clause. This is how diagnosing-bugs, grilling, wizard and
+# writing-for-agents appear.
 extract_trigger_clause() {
   local desc="$1"
-  case "$desc" in
-    "Use when "*) desc="${desc#Use when }" ;;
-  esac
   printf '%s' "$desc" | sed -E 's/ (—|-) .*$//'
 }
 
 generate_routing_block() {
   local skill_file name desc clause
-  for skill_file in "$REPO_ROOT"/skills/*/SKILL.md; do
+  for skill_file in "$SKILLS_DIR"/*/SKILL.md; do
     [ -f "$skill_file" ] || continue
     name="$(extract_frontmatter_field "$skill_file" "name")"
     [ -n "$name" ] || die "no 'name' field found in $skill_file"
     [ "$name" = "$SELF_SKILL" ] && continue
+    [ "$(extract_frontmatter_field "$skill_file" "disable-model-invocation")" = "true" ] && continue
     desc="$(extract_frontmatter_field "$skill_file" "description")"
     desc="$(strip_quotes "$desc")"
     clause="$(extract_trigger_clause "$desc")"
     printf '%s\t%s\n' "$name" "$clause"
   done | sort -k1,1 | while IFS=$'\t' read -r name clause; do
-    case "$clause" in
-      "Use when "*|"You MUST"*) printf -- '- %s → superpowers:%s\n' "$clause" "$name" ;;
-      *) printf -- '- Use when %s → superpowers:%s\n' "$clause" "$name" ;;
-    esac
+    printf -- '- %s → superpowers:%s\n' "$clause" "$name"
   done
 }
 

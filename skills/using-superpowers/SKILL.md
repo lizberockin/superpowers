@@ -36,9 +36,11 @@ When multiple skills apply, process skills come first — they set the approach,
 - You MUST use this before any creative work → superpowers:brainstorming
 - Use when a problem was just solved, a durable project convention was established, or project-specific vocabulary emerged → superpowers:compound-learnings
 - Use when the user signals the session is wrapping up → superpowers:compound-memory
+- Diagnosis loop for hard bugs and performance regressions. Use when the user says "diagnose"/"debug this", or reports something broken/throwing/failing/slow. → superpowers:diagnosing-bugs
 - Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies → superpowers:dispatching-parallel-agents
 - Use when you have a written implementation plan to execute in a separate session with review checkpoints → superpowers:executing-plans
 - Use when implementation is complete, all tests pass, and you need to decide how to integrate the work → superpowers:finishing-a-development-branch
+- Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases. → superpowers:grilling
 - Use when the user asks for ideas, improvements, surprising options, or AI-generated directions before choosing one to develop → superpowers:ideate
 - Use when the user has a new product/project idea, asks whether something is worth building, wants to think through design decisions for something that doesn't exist yet, or is exploring a concept before any code is written → superpowers:office-hours
 - Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable → superpowers:receiving-code-review
@@ -48,6 +50,8 @@ When multiple skills apply, process skills come first — they set the approach,
 - Use when implementing any feature or bugfix, before writing implementation code → superpowers:test-driven-development
 - Use when starting feature work that needs isolation from current workspace or before executing implementation plans → superpowers:using-git-worktrees
 - Use when about to claim work is complete, fixed, or passing, before committing or creating PRs → superpowers:verification-before-completion
+- Generate an interactive bash wizard that walks a human through steps only they can perform. Use when provisioning infrastructure, setting up credentials or CI secrets, walking an unfamiliar third-party dashboard, or running a one-off migration or cutover. Don't invoke this for steps the agent can perform itself. → superpowers:wizard
+- Writing documents for agents. Use when creating or editing skills, or modifying AGENTS.md or CLAUDE.md. → superpowers:writing-for-agents
 - Use when you have a spec or requirements for a multi-step task, before touching code → superpowers:writing-plans
 - Use when creating new skills, editing existing skills, or verifying skills work before deployment → superpowers:writing-skills
 <!-- END GENERATED ROUTING TABLE -->
