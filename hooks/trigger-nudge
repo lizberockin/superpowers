@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# UserPromptSubmit hook: deterministic skill triggers.
+# A skill declares trigger phrases between <trigger_phrases> and </trigger_phrases>,
+# one `- "phrase"` per line, inside an <auto_invoke> block. A short prompt containing
+# one of them (case-insensitive, on word boundaries) nudges toward that skill; every
+# matching skill gets its own nudge, all delivered in one context. An optional
+# mode="consider" attribute on the <auto_invoke> tag softens the wording.
+# Phrases are read from the skills themselves so the two cannot drift.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SKILLS_DIR="${SCRIPT_DIR}/../skills"
+MAX_PROMPT_CHARS=120
+
+input="$(cat)"
+
+if command -v jq >/dev/null 2>&1; then
+  prompt="$(printf '%s' "$input" | jq -r '.prompt // empty' 2>/dev/null || true)"
+else
+  prompt="$input"
+fi
+
+[ -n "$prompt" ] || exit 0
+[ "${#prompt}" -le "$MAX_PROMPT_CHARS" ] || exit 0
+
+nudge_text() {
+  local name="$1" mode="$2" phrase="$3"
+  if [ "$mode" = "consider" ]; then
+    printf "The user's message ('%s') matches a trigger for superpowers:%s. Consider invoking it if it applies." "$phrase" "$name"
+  else
+    printf "The user's message ('%s') matches a trigger for superpowers:%s. Invoke it now, before your final reply." "$phrase" "$name"
+  fi
+}
+
+emit() {
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "UserPromptSubmit",\n    "additionalContext": "%s"\n  }\n}\n' "$1"
+}
+
+nudges=""
+lower="$(printf '%s' "$prompt" | tr '[:upper:]' '[:lower:]')"
+
+for skill_file in "$SKILLS_DIR"/*/SKILL.md; do
+  [ -r "$skill_file" ] || continue
+  grep -q '<trigger_phrases>' "$skill_file" || continue
+
+  phrases="$(awk '/^[[:space:]]*<trigger_phrases>/{on=($0 !~ /<\/trigger_phrases>/);next} /<\/trigger_phrases>/{on=0} on && /^- "/{sub(/\r$/,"");sub(/^- "/,"");sub(/"$/,"");print}' "$skill_file")"
+  [ -n "$phrases" ] || continue
+
+  name="$(basename "$(dirname "$skill_file")")"
+  mode="$(grep -o '<auto_invoke[^>]*>' "$skill_file" | head -n 1 | sed -n 's/.*mode="\([a-z]*\)".*/\1/p' || true)"
+
+  while IFS= read -r phrase; do
+    [ -n "$phrase" ] || continue
+    p="$(printf '%s' "$phrase" | tr '[:upper:]' '[:lower:]')"
+    if printf '%s' "$lower" | grep -qE "(^|[^[:alnum:]])${p//./\\.}([^[:alnum:]]|$)"; then
+      nudges="${nudges:+$nudges }$(nudge_text "$name" "$mode" "$phrase")"
+      break
+    fi
+  done <<< "$phrases"
+done
+
+[ -z "$nudges" ] || emit "$nudges"
+exit 0

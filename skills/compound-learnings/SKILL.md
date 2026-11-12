@@ -711,7 +711,12 @@ Build → Test → Find Issue → Research → Improve → Document → Validate
 
 ## Auto-Invoke
 
-<auto_invoke> <trigger_phrases> - "that worked" - "it's fixed" - "working now" - "problem solved" </trigger_phrases>
+<auto_invoke mode="consider">
+<trigger_phrases>
+- "it's fixed"
+- "working now"
+- "problem solved"
+</trigger_phrases>
 
 <manual_override> Ask for compound-learnings by name, with context, to document immediately without waiting for auto-detection. </manual_override> </auto_invoke>
 

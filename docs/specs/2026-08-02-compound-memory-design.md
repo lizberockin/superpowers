@@ -89,3 +89,5 @@ Added, still without a `Stop` or `SessionEnd` hook and without transcript scanni
 Unverified: the docs do not state whether `additionalContext` from `SessionStart` with `source=compact` lands in the post-compaction context, or whether `PreCompact` stdout reaches the summarizer as described. Verify empirically after the first real compaction.
 
 Also added: a stale-entry check (step 3) so the same batch can propose updating or deleting entries the session contradicted or resolved, such as "PR merged" status snapshots. Not added: new frontmatter fields (`scope`, `evidence`). There is no global store for a scope field to select, and `Why:` lines already carry evidence.
+
+Later note (2026-11-12): `wrap-up-nudge` was renamed `trigger-nudge` and generalised to read every skill's `<trigger_phrases>` block; see `docs/specs/2026-11-12-trigger-router-design.md`.

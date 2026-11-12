@@ -29,7 +29,7 @@ Ask for compound-memory by name to check for anything to remember, without waiti
 </manual_override>
 </auto_invoke>
 
-Two hooks make this deterministic rather than relying on judgment: `wrap-up-nudge` (UserPromptSubmit) matches the phrases above, and `session-start` adds a nudge after compaction. After compaction, scan the compaction summary, including its "Unsaved memory candidates" section, and wait for a natural pause rather than interrupting the task in progress.
+Two hooks make this deterministic rather than relying on judgment: `trigger-nudge` (UserPromptSubmit) matches the phrases above, and `session-start` adds a nudge after compaction. After compaction, scan the compaction summary, including its "Unsaved memory candidates" section, and wait for a natural pause rather than interrupting the task in progress.
 
 ## Process
 
