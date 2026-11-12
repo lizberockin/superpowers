@@ -7,6 +7,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
+# Hook payload (JSON on stdin) tells us why the session started. Bounded read so a
+# caller with an open, silent stdin cannot hang the hook.
+hook_input=""
+IFS= read -r -t 1 -d '' hook_input || true
+hook_source="$(printf '%s' "$hook_input" | sed -n 's/.*"source" *: *"\([a-z]*\)".*/\1/p' | head -n 1)"
+
 # Read using-superpowers content
 using_superpowers_content=$(cat "${PLUGIN_ROOT}/skills/using-superpowers/SKILL.md" 2>&1 || echo "Error reading using-superpowers skill")
 
@@ -25,6 +31,10 @@ escape_for_json() {
 
 using_superpowers_escaped=$(escape_for_json "$using_superpowers_content")
 session_context="<EXTREMELY_IMPORTANT>\nYou have superpowers.\n\n**Below is the full content of your 'superpowers:using-superpowers' skill - your introduction to using skills. For all other skills, use the 'Skill' tool:**\n\n${using_superpowers_escaped}\n</EXTREMELY_IMPORTANT>"
+
+if [ "$hook_source" = "compact" ]; then
+  session_context="${session_context}\n\nContext was just compacted, so facts from before the compaction may be gone. At your next natural pause (not mid-task), invoke superpowers:compound-memory to check the compaction summary for memory-worthy facts that were never saved."
+fi
 
 # Output context injection as JSON.
 # Cursor hooks expect additional_context (snake_case).

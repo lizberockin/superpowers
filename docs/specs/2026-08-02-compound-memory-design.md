@@ -75,3 +75,17 @@ Use the existing two-step Auto Memory write process unchanged: create/update the
 
 - Exact final wind-down trigger-phrase list.
 - Whether the scan step needs any tooling beyond reading the current context and `MEMORY.md`, or whether it's pure prompt instruction (current expectation: pure prompt instruction, no scripts, matching this skill's low-complexity scope).
+
+## Revisited 2026-11-12: deterministic triggers via hooks
+
+The 2026-08-02 decision deferred hooks "unless the missed case turns out to matter in practice." Evidence since: across 120 local Claude Code sessions (67 in one project), only 12 memory files had been saved and no transcript other than the one reading the skill contained the skill's own text, i.e. `compound-memory` had effectively never been invoked. Skill auto-invocation on trigger phrases is judgment-based, and the silent tab-close case was never covered.
+
+Added, still without a `Stop` or `SessionEnd` hook and without transcript scanning:
+
+- **`wrap-up-nudge`** (`UserPromptSubmit`): reads the phrase list from this skill's `<trigger_phrases>` block (single source of truth) and, for prompts of 120 characters or fewer that contain a phrase on word boundaries, injects an instruction to invoke the skill.
+- **`pre-compact`** (`PreCompact`): its stdout is documented as instructions for the compaction summary. It asks the summary to keep an "Unsaved memory candidates" section. A hook cannot make the model act before compaction; this is the only documented lever.
+- **`session-start`**: when the hook payload's `source` is `compact`, appends a nudge to invoke this skill at the next natural pause.
+
+Unverified: the docs do not state whether `additionalContext` from `SessionStart` with `source=compact` lands in the post-compaction context, or whether `PreCompact` stdout reaches the summarizer as described. Verify empirically after the first real compaction.
+
+Also added: a stale-entry check (step 3) so the same batch can propose updating or deleting entries the session contradicted or resolved, such as "PR merged" status snapshots. Not added: new frontmatter fields (`scope`, `evidence`). There is no global store for a scope field to select, and `Why:` lines already carry evidence.

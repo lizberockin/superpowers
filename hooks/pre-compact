@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# PreCompact hook: plain stdout becomes instructions for the compaction summary.
+# A hook cannot make the model act before compaction, so ask the summary to keep
+# memory-worthy facts that session-start's compact nudge can then act on.
+
+set -euo pipefail
+
+cat <<'EOF'
+In the summary, include a short section titled "Unsaved memory candidates": user preferences or corrections, decisions and their reasons, and project facts from this session that are not already recorded in MEMORY.md. One line each. Omit the section if there are none.
+EOF
+exit 0
