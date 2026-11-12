@@ -68,19 +68,29 @@ Hitting a wall? See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for known failure m
 - **brainstorming** — You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.
 - **compound-learnings** — Use when a problem was just solved, a durable project convention was established, or project-specific vocabulary emerged - captures it as searchable documentation in docs/solutions/ or CONCEPTS.md before the context is lost.
 - **compound-memory** — Use when the user signals the session is wrapping up - checks whether anything worth remembering was never saved to Claude Code's Auto Memory.
+- **diagnosing-bugs** — Diagnosis loop for hard bugs and performance regressions. Use when the user says "diagnose"/"debug this", or reports something broken/throwing/failing/slow.
 - **dispatching-parallel-agents** — Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies
 - **executing-plans** — Use when you have a written implementation plan to execute in a separate session with review checkpoints
 - **finishing-a-development-branch** — Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
+- **grill-me** — A relentless interview to sharpen a plan or design.
+- **grilling** — Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
+- **handoff** — Compact the current conversation into a handoff document for another agent to pick up.
 - **ideate** — Use when the user asks for ideas, improvements, surprising options, or AI-generated directions before choosing one to develop - generates and evaluates grounded ideas via parallel research subagents. Use brainstorming instead to refine an idea the user already has in mind.
+- **loop-me** — Grill me about specs for the workflows I want to build, within this workspace.
 - **office-hours** — Use when the user has a new product/project idea, asks whether something is worth building, wants to think through design decisions for something that doesn't exist yet, or is exploring a concept before any code is written - proactively invoke rather than answering directly. Two modes: Startup mode runs six YC-style forcing questions (demand reality, status quo, desperate specificity, narrowest wedge, observation, future-fit); Builder mode is design-thinking brainstorming for side projects, hackathons, learning, and open source. Produces a design doc, never code.
 - **receiving-code-review** — Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation
 - **requesting-code-review** — Use when completing tasks, implementing major features, or before merging to verify work meets requirements
 - **subagent-driven-development** — Use when executing implementation plans with independent tasks in the current session
 - **systematic-debugging** — Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
+- **teach** — Teach the user a new skill or concept, within this workspace.
 - **test-driven-development** — Use when implementing any feature or bugfix, before writing implementation code
+- **to-questionnaire** — Turn a decision you can't fully answer into a questionnaire for someone else to fill in.
 - **using-git-worktrees** — Use when starting feature work that needs isolation from current workspace or before executing implementation plans - ensures an isolated workspace exists via native tools or git worktree fallback
 - **using-superpowers** — Use when starting any conversation - establishes how to find and use skills, requiring skill invocation before ANY response including clarifying questions
 - **verification-before-completion** — Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
+- **wait-what** — Stop. That last message did not land: re-pitch it.
+- **wizard** — Generate an interactive bash wizard that walks a human through steps only they can perform. Use when provisioning infrastructure, setting up credentials or CI secrets, walking an unfamiliar third-party dashboard, or running a one-off migration or cutover. Don't invoke this for steps the agent can perform itself.
+- **writing-for-agents** — Writing documents for agents. Use when creating or editing skills, or modifying AGENTS.md or CLAUDE.md.
 - **writing-plans** — Use when you have a spec or requirements for a multi-step task, before touching code
 - **writing-skills** — Use when creating new skills, editing existing skills, or verifying skills work before deployment
 <!-- END GENERATED SKILL CATALOG -->
